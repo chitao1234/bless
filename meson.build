@@ -8,8 +8,8 @@ project(
 
 add_project_arguments('-d:ENABLE_UNIX_SPECIFIC', language: 'cs')
 
-gtk_sharp_2_dep = dependency('gtk-sharp-2.0')
-glib_sharp_2_dep = dependency('glib-sharp-2.0')
+gtk_sharp_3_dep = dependency('gtk-sharp-3.0')
+glib_sharp_3_dep = dependency('glib-sharp-3.0')
 
 subdir('src')
 subdir('data')

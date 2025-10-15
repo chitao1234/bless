@@ -38,7 +38,7 @@ util_lib = library(
         'util/TempFile.cs',
         'util/ThreadedAsyncOperation.cs'
     ) + [configure_defines_cs],
-    dependencies: glib_sharp_2_dep,
+    dependencies: glib_sharp_3_dep,
     cs_args: '-r:Mono.Posix',
     install: true,
     install_dir: assembly_install_dir,
@@ -70,7 +70,7 @@ buffers_lib = library(
         'buffers/SegmentCollection.cs',
         'buffers/SimpleBuffer.cs'
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     cs_args: '-r:Mono.Posix',
     link_with: [
         tools_lib,
@@ -126,7 +126,7 @@ gui_drawers_lib = library(
         'gui/drawers/OctalDrawer.cs',
         'gui/drawers/PixmapManager.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     install: true,
     install_dir: assembly_install_dir,
 )
@@ -138,7 +138,7 @@ gui_areas_lib = library(
         'gui/areas/AreaGroup.cs',
         'gui/areas/Highlight.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     link_with: [
         buffers_lib,
         gui_drawers_lib,
@@ -159,7 +159,7 @@ plugins_lib = library(
         'plugins/Plugin.cs',
         'plugins/PluginManager.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     link_with: [
         gui_areas_lib,
         tools_export_lib,
@@ -198,7 +198,7 @@ gui_lib = library(
         'gui/UIService.cs',
         'gui/WidgetGroup.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     cs_args: ['-r:Mono.Posix', '-nowarn:0169'],
     link_with: [
         buffers_lib,
@@ -233,7 +233,7 @@ gui_plugins_lib = library(
         'gui/plugins/SelectLayoutPlugin.cs',
         'gui/plugins/SelectRangePlugin.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     cs_args: ['-r:Mono.Posix', '-nowarn:0169'],
     link_with: [
         buffers_lib,
@@ -261,7 +261,7 @@ gui_areas_plugins_lib = library(
         'gui/areas/OffsetArea.cs',
         'gui/areas/SeparatorArea.cs',
     ),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     link_with: [
         buffers_lib,
         gui_areas_lib,
@@ -295,7 +295,7 @@ tools_export_plugins_lib = library(
 bless = executable(
     'bless',
     files('gui/MainWindow.cs'),
-    dependencies: gtk_sharp_2_dep,
+    dependencies: gtk_sharp_3_dep,
     cs_args: ['-r:Mono.Posix', '-nowarn:0169'],
     link_with: [
         buffers_lib,

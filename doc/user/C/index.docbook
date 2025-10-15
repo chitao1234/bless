@@ -127,9 +127,9 @@
 <chapter id="bless-introduction"> 
 	<title>Introduction</title> 
 	<para>
-	&app; is a binary (hex) editor, a program that enables you to edit files as
-	sequences of bytes. It is written in C# and uses the Gtk# bindings for the
-	GTK+ toolkit.
+		&app; is a binary (hex) editor, a program that enables you to edit files as
+		sequences of bytes. It is written in C# and uses the Gtk# bindings for the
+		GTK+ 3 toolkit.
 	</para>
 	<para>
 	&app; provides the following features:
@@ -184,13 +184,13 @@
 			To build and run &app; &appversion; you need:
 			<itemizedlist>
 				<listitem>
-					<para>GTK+ &gt;=2.8.x (Included in all modern GNU/Linux distributions, <ulink url="http://www.gtk.org" type="http">http://www.gtk.org</ulink>)</para>
+                                <para>GTK+ &gt;=3.0 (Included in all modern GNU/Linux distributions, <ulink url="https://www.gtk.org" type="http">https://www.gtk.org</ulink>)</para>
 				</listitem>
 				<listitem>
 					<para>mono/.NET runtime and C# compiler &gt;= 1.1.14 (<ulink url="http://www.mono-project.com" type="http">http://www.mono-project.com</ulink>)</para>
 				</listitem>
 				<listitem>
-					<para>Gtk#  &gt;=2.8 bindings for GTK+ (<ulink url="http://gtk-sharp.sourceforge.net" type="http">http://gtk-sharp.sourceforge.net</ulink>)</para>
+                                <para>Gtk#  &gt;=3.0 bindings for GTK+ 3 (<ulink url="https://www.mono-project.com/docs/gui/gtksharp/" type="http">https://www.mono-project.com/docs/gui/gtksharp/</ulink>)</para>
 				</listitem>
 				<listitem>
 					<para>pkg-config (Included in all modern GNU/Linux distributions)</para>
