@@ -98,9 +98,9 @@ public class GotoOffsetPlugin : GuiPlugin
 ///<summary>
 /// A widget for go to offset operation
 ///</summary>
-public class GotoOffsetWidget : Gtk.HBox
+public class GotoOffsetWidget : Gtk.Box
 {
-	[Gtk.Builder.Object] Gtk.HBox GotoOffsetHBox;
+        [Gtk.Builder.Object] Gtk.Box GotoOffsetHBox;
 	[Gtk.Builder.Object] Gtk.Button GotoOffsetButton;
 	[Gtk.Builder.Object] Gtk.Entry OffsetEntry;
 	[Gtk.Builder.Object] Gtk.Button CloseButton;
@@ -108,9 +108,9 @@ public class GotoOffsetWidget : Gtk.HBox
 	DataBook dataBook;
 
 
-	public GotoOffsetWidget(DataBook db)
-	{
-		dataBook = db;
+        public GotoOffsetWidget(DataBook db) : base(Gtk.Orientation.Horizontal, 0)
+        {
+                dataBook = db;
 
 		Gtk.Builder builder = new Gtk.Builder();
 		builder.AddFromFile(FileResourcePath.GetDataPath("ui", "GotoOffsetPlugin.ui"));
@@ -134,15 +134,10 @@ public class GotoOffsetWidget : Gtk.HBox
 	///</summary>
 	bool IsFocusInWidget()
 	{
-		foreach (Gtk.Widget child in  GotoOffsetHBox.Children) {
-			Widget realChild = child;
-
-			if (child.GetType() == typeof(Gtk.Alignment))
-				realChild = (child as Gtk.Alignment).Child;
-
-			if (realChild.HasFocus)
-				return true;
-		}
+                foreach (Gtk.Widget child in  GotoOffsetHBox.Children) {
+                        if (child.HasFocus)
+                                return true;
+                }
 
 		return false;
 	}

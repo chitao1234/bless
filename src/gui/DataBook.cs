@@ -218,10 +218,10 @@ public class DataBook : Gtk.Notebook
 }
 
 ///<summary>A widget to display on each tab label</summary>
-class DataBookTabLabel : Gtk.HBox
+class DataBookTabLabel : Gtk.Box
 {
-	Gtk.Label label;
-	Gtk.Button closeButton;
+        Gtk.Label label;
+        Gtk.Button closeButton;
 	DataView dataView;
 	CloseViewDelegate doCloseFile;
 
@@ -234,30 +234,28 @@ class DataBookTabLabel : Gtk.HBox
 		get { return closeButton; }
 	}
 
-	public DataBookTabLabel(DataView dv, CloseViewDelegate deleg, string str)
-	{
-		dataView = dv;
-		doCloseFile = deleg;
+        public DataBookTabLabel(DataView dv, CloseViewDelegate deleg, string str) : base(Gtk.Orientation.Horizontal, 2)
+        {
+                dataView = dv;
+                doCloseFile = deleg;
 
-		dataView.NotificationChanged += OnNotificationChanged;
+                dataView.NotificationChanged += OnNotificationChanged;
 
-		label = new Gtk.Label(str);
-		label.UseMarkup = true;
-		label.UseUnderline = false;
+                label = new Gtk.Label(str);
+                label.UseMarkup = true;
+                label.UseUnderline = false;
 
-		Gtk.Image img = new Gtk.Image(Gtk.Stock.Close, Gtk.IconSize.Menu);
-		img.SetSizeRequest(8, 8);
+                closeButton = new Gtk.Button();
+                Gtk.Image img = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Menu);
+                img.SetSizeRequest(8, 8);
+                closeButton.Image = img;
+                closeButton.AlwaysShowImage = true;
 
-		// This doesn't compile in 1.0.2 and older,
-		// keep it for later eg gtk# 2.0
-		closeButton = new Gtk.Button(img);
+                closeButton.Relief = Gtk.ReliefStyle.None;
+                closeButton.Clicked += OnCloseClicked;
+                closeButton.CanFocus = false;
 
-		closeButton.Relief = Gtk.ReliefStyle.None;
-		closeButton.Clicked += OnCloseClicked;
-		closeButton.CanFocus = false;
-
-		this.Spacing = 2;
-		this.PackStart(label, false, false, 0);
+                this.PackStart(label, false, false, 0);
 		this.PackStart(closeButton, false, false, 0);
 
 		this.ShowAll();

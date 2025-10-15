@@ -48,22 +48,26 @@ public class SaveConfirmationMultiAlert : Alert
 	{
 		fileList = list;
 
-		image.SetFromStock(Gtk.Stock.DialogWarning, Gtk.IconSize.Dialog);
+                image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
 
-		Label label = new Label(Catalog.GetString("\nSelect the files you want to save:\n"));
-		label.Xalign = 0.0f;
+                Label label = new Label(Catalog.GetString("\nSelect the files you want to save:\n"));
+                label.SetAlignment(0f, 0f);
 
-		VBox vb = new VBox();
-		vb.PackStart(label);
-		treeView = CreateView(list);
-		vb.PackStart(treeView);
+                Gtk.Box vb = new Gtk.Box(Gtk.Orientation.Vertical, 0);
+                vb.PackStart(label, false, false, 0);
+                treeView = CreateView(list);
+                vb.PackStart(treeView, true, true, 0);
 
-		labelBox.PackStart(vb);
-		labelBox.ReorderChild(vb, 1);
+                labelBox.PackStart(vb, false, false, 0);
+                labelBox.ReorderChild(vb, 1);
 
-		this.AddButton(Catalog.GetString("Close without Saving"), ResponseType.No);
-		this.AddButton(Gtk.Stock.Cancel, ResponseType.Cancel);
-		this.AddButton(Gtk.Stock.Save, ResponseType.Ok);
+                this.AddButton(Catalog.GetString("Close without Saving"), ResponseType.No);
+                Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
+                cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
+                cancelButton.AlwaysShowImage = true;
+                Gtk.Button saveButton = (Gtk.Button)this.AddButton(Catalog.GetString("Save"), ResponseType.Ok);
+                saveButton.Image = Gtk.Image.NewFromIconName("document-save", Gtk.IconSize.Button);
+                saveButton.AlwaysShowImage = true;
 
 		this.DefaultResponse = ResponseType.Cancel;
 

@@ -29,13 +29,13 @@ using Bless.Util;
 namespace Bless.Gui {
 
 ///<summary>A widget that displays data from a buffer</summary>
-public class DataViewDisplay : Gtk.VBox {
-	Layout layout;
-	Gtk.HBox hbox;
-	Gtk.DrawingArea drawingArea;
-	//static Gtk.DrawingArea drawingArea=new Gtk.DrawingArea();
-	Gtk.VScrollbar vscroll;
-	Gtk.HBox fileChangedBar;
+public class DataViewDisplay : Gtk.Box {
+        Layout layout;
+        Gtk.Box hbox;
+        Gtk.DrawingArea drawingArea;
+        //static Gtk.DrawingArea drawingArea=new Gtk.DrawingArea();
+        Gtk.VScrollbar vscroll;
+        FileChangedBar fileChangedBar;
 	bool widgetRealized;
 
 	DataViewControl dvControl;
@@ -107,9 +107,9 @@ public class DataViewDisplay : Gtk.VBox {
 	}
 
 	///<summary>Create a DataViewDisplay</summary>
-	public DataViewDisplay(DataView dv)
-	{
-		dataView = dv;
+        public DataViewDisplay(DataView dv) : base(Gtk.Orientation.Vertical, 0)
+        {
+                dataView = dv;
 
 		// load the default layout from the data directory
 		layout = new Layout(FileResourcePath.GetDataPath("bless-default.layout"));
@@ -138,12 +138,12 @@ public class DataViewDisplay : Gtk.VBox {
 
 		drawingArea.CanFocus = true; // needed to catch key events
 
-		hbox = new Gtk.HBox();
+                hbox = new Gtk.Box(Gtk.Orientation.Horizontal, 0);
 
-		hbox.PackStart(drawingArea , true, true, 0);
-		hbox.PackStart(vscroll , false, false, 0);
+                hbox.PackStart(drawingArea , true, true, 0);
+                hbox.PackStart(vscroll , false, false, 0);
 
-		this.PackStart(hbox);
+                this.PackStart(hbox, true, true, 0);
 	}
 
 	///<summary>Force a complete redraw of the view</summary>

@@ -119,14 +119,14 @@ public class StatisticsInfo
 	}
 }
 
-public class StatisticsWidget : Gtk.HBox
+public class StatisticsWidget : Gtk.Box
 {
 	StatisticsDrawWidget  sdw;
 	DataBook dataBook;
 	Hashtable info;
 
-	public StatisticsWidget(DataBook db)
-	{
+        public StatisticsWidget(DataBook db) : base(Gtk.Orientation.Vertical, 0)
+        {
 		info = new Hashtable();
 		dataBook = db;
 		dataBook.SwitchPage += new SwitchPageHandler(OnSwitchPage);

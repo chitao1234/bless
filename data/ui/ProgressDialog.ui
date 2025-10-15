@@ -1,9 +1,10 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <object class="GtkVBox" id="ProgressVBox">
+  <object class="GtkBox" id="ProgressVBox">
     <property name="visible">True</property>
     <property name="border_width">7</property>
     <property name="spacing">12</property>
+    <property name="orientation">vertical</property>
     <child>
       <object class="GtkLabel" id="MessageLabel">
         <property name="visible">True</property>
