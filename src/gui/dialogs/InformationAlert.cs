@@ -31,10 +31,10 @@ public class InformationAlert : Alert
 	public InformationAlert(string primary, string secondary, Gtk.Window parent)
 			: base(primary, secondary, parent)
 	{
-                image.SetFromIconName("dialog-information", Gtk.IconSize.Dialog);
-                Gtk.Button okButton = (Gtk.Button)this.AddButton(Catalog.GetString("OK"), ResponseType.Ok);
-                okButton.Image = Gtk.Image.NewFromIconName("dialog-ok", Gtk.IconSize.Button);
-                okButton.AlwaysShowImage = true;
+		image.SetFromIconName("dialog-information", Gtk.IconSize.Dialog);
+		Gtk.Button okButton = (Gtk.Button)this.AddButton(Catalog.GetString("OK"), ResponseType.Ok);
+		okButton.Image = Gtk.Image.NewFromIconName("dialog-ok", Gtk.IconSize.Button);
+		okButton.AlwaysShowImage = true;
 
 		this.ShowAll();
 	}

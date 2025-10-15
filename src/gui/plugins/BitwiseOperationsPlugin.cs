@@ -193,7 +193,7 @@ public class BitwiseOperationsPlugin : GuiPlugin
 ///</summary>
 public class BitwiseOperationsWidget : Gtk.Box
 {
-        [Gtk.Builder.Object] Gtk.Box BitwiseOperationsHBox;
+	[Gtk.Builder.Object] Gtk.Box BitwiseOperationsHBox;
 	[Gtk.Builder.Object] Gtk.Label SourceLabel;
 	[Gtk.Builder.Object] Gtk.EventBox SourceLabelEB;
 	[Gtk.Builder.Object] Gtk.Button DoOperationButton;
@@ -229,8 +229,8 @@ public class BitwiseOperationsWidget : Gtk.Box
 		}
 	}
 
-        public BitwiseOperationsWidget(DataBook db, Gtk.Action action) : base(Gtk.Orientation.Horizontal, 0)
-        {
+	public BitwiseOperationsWidget(DataBook db, Gtk.Action action) : base(Gtk.Orientation.Horizontal, 0)
+	{
 		dataBook = db;
 		performAction = action;
 
@@ -256,10 +256,10 @@ public class BitwiseOperationsWidget : Gtk.Box
 	///</summary>
 	bool IsFocusInWidget()
 	{
-                foreach (Gtk.Widget child in  BitwiseOperationsHBox.Children) {
-                        if (child.HasFocus)
-                                return true;
-                }
+		foreach (Gtk.Widget child in  BitwiseOperationsHBox.Children) {
+			if (child.HasFocus)
+				return true;
+		}
 
 		return false;
 	}

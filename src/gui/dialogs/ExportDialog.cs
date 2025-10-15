@@ -38,7 +38,7 @@ public class ExportDialog : Dialog
 	DataBook dataBook;
 	Gtk.Window mainWindow;
 
-        [Gtk.Builder.Object] Gtk.Box ExportDialogVBox;
+	[Gtk.Builder.Object] Gtk.Box ExportDialogVBox;
 	[Gtk.Builder.Object] Gtk.ComboBox ExportAsCombo;
 	[Gtk.Builder.Object] Gtk.ComboBoxEntry ExportPatternComboEntry;
 	[Gtk.Builder.Object] Gtk.ProgressBar ExportProgressBar;
@@ -48,7 +48,7 @@ public class ExportDialog : Dialog
 	[Gtk.Builder.Object] Gtk.RadioButton RangeRadio;
 	[Gtk.Builder.Object] Gtk.Entry RangeFromEntry;
 	[Gtk.Builder.Object] Gtk.Entry RangeToEntry;
-        [Gtk.Builder.Object] Gtk.Box ProgressHBox;
+	[Gtk.Builder.Object] Gtk.Box ProgressHBox;
 	Gtk.Button CloseButton;
 	Gtk.Button ExportButton;
 
@@ -85,14 +85,14 @@ public class ExportDialog : Dialog
 		ProgressHBox.Visible = false;
 		cancelClicked = false;
 
-                this.Modal = false;
-                this.BorderWidth = 6;
-                CloseButton = (Gtk.Button)this.AddButton(Catalog.GetString("Close"), ResponseType.Close);
-                CloseButton.Image = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Button);
-                CloseButton.AlwaysShowImage = true;
-                ExportButton = (Gtk.Button)this.AddButton(Catalog.GetString("Export"), ResponseType.Ok);
-                this.Response += new ResponseHandler(OnDialogResponse);
-                this.ContentArea.Add(ExportDialogVBox);
+		this.Modal = false;
+		this.BorderWidth = 6;
+		CloseButton = (Gtk.Button)this.AddButton(Catalog.GetString("Close"), ResponseType.Close);
+		CloseButton.Image = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Button);
+		CloseButton.AlwaysShowImage = true;
+		ExportButton = (Gtk.Button)this.AddButton(Catalog.GetString("Export"), ResponseType.Ok);
+		this.Response += new ResponseHandler(OnDialogResponse);
+		this.ContentArea.Add(ExportDialogVBox);
 	}
 
 	private void SetupExportPlugins()

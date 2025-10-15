@@ -27,11 +27,11 @@ namespace Bless.Gui.Dialogs {
 ///<summary>An alert dialog box as recommended in the Gnome HIG</summary>
 abstract public class Alert : Gtk.Dialog
 {
-        protected Gtk.Box hbox;
-        protected Gtk.Box labelBox;
-        protected Gtk.Image image;
-        protected Gtk.Label labelPrimary;
-        protected Gtk.Label labelSecondary;
+	protected Gtk.Box hbox;
+	protected Gtk.Box labelBox;
+	protected Gtk.Image image;
+	protected Gtk.Label labelPrimary;
+	protected Gtk.Label labelSecondary;
 
 	public Alert(string primary, string secondary, Gtk.Window parent)
 			: base("", parent, Gtk.DialogFlags.DestroyWithParent)
@@ -39,37 +39,37 @@ abstract public class Alert : Gtk.Dialog
 		// set-up alert
 		this.Modal = true;
 		//this.TypeHint=Gdk.WindowTypeHint.Utility;
-                this.BorderWidth = 6;
-                this.Resizable = false;
+		this.BorderWidth = 6;
+		this.Resizable = false;
 
-                this.ContentArea.Spacing = 12;
+		this.ContentArea.Spacing = 12;
 
-                hbox = new Gtk.Box(Gtk.Orientation.Horizontal, 12);
-                hbox.BorderWidth = 6;
-                this.ContentArea.Add(hbox);
+		hbox = new Gtk.Box(Gtk.Orientation.Horizontal, 12);
+		hbox.BorderWidth = 6;
+		this.ContentArea.Add(hbox);
 
-                // set-up image
-                image = new Gtk.Image();
-                image.Valign = Gtk.Align.Start;
-                hbox.Add(image);
+		// set-up image
+		image = new Gtk.Image();
+		image.Valign = Gtk.Align.Start;
+		hbox.Add(image);
 
-                // set-up labels
-                labelPrimary = new Gtk.Label();
-                labelPrimary.SetAlignment(0f, 0f);
-                labelPrimary.UseMarkup = true;
-                labelPrimary.Wrap = true;
+		// set-up labels
+		labelPrimary = new Gtk.Label();
+		labelPrimary.SetAlignment(0f, 0f);
+		labelPrimary.UseMarkup = true;
+		labelPrimary.Wrap = true;
 
-                labelSecondary = new Gtk.Label();
-                labelSecondary.SetAlignment(0f, 0f);
-                labelSecondary.UseMarkup = true;
-                labelSecondary.Wrap = true;
+		labelSecondary = new Gtk.Label();
+		labelSecondary.SetAlignment(0f, 0f);
+		labelSecondary.UseMarkup = true;
+		labelSecondary.Wrap = true;
 
-                labelPrimary.Markup = "<span weight=\"bold\" size=\"larger\">" + primary + "</span>";
-                labelSecondary.Markup = "\n" + secondary;
+		labelPrimary.Markup = "<span weight=\"bold\" size=\"larger\">" + primary + "</span>";
+		labelSecondary.Markup = "\n" + secondary;
 
-                labelBox = new Gtk.Box(Gtk.Orientation.Vertical, 0);
-                labelBox.Add(labelPrimary);
-                labelBox.Add(labelSecondary);
+		labelBox = new Gtk.Box(Gtk.Orientation.Vertical, 0);
+		labelBox.Add(labelPrimary);
+		labelBox.Add(labelSecondary);
 
 		hbox.Add(labelBox);
 	}

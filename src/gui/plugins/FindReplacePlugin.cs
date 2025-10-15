@@ -276,7 +276,7 @@ public class FindReplaceWidget : Gtk.Box
 
 	byte[] replacePattern;
 
-        [Gtk.Builder.Object] Gtk.Grid FindReplaceTable;
+	[Gtk.Builder.Object] Gtk.Grid FindReplaceTable;
 	[Gtk.Builder.Object] Gtk.Button FindNextButton;
 	[Gtk.Builder.Object] Gtk.Button FindPreviousButton;
 	[Gtk.Builder.Object] Gtk.Button ReplaceButton;
@@ -330,8 +330,8 @@ public class FindReplaceWidget : Gtk.Box
 		}
 	}
 
-        public FindReplaceWidget(DataBook db, IFinder iFinder) : base(Gtk.Orientation.Vertical, 0)
-        {
+	public FindReplaceWidget(DataBook db, IFinder iFinder) : base(Gtk.Orientation.Vertical, 0)
+	{
 		finder = iFinder;
 		dataBook = db;
 

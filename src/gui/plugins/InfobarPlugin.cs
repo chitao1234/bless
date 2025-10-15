@@ -302,8 +302,8 @@ public class Infobar : Gtk.Box, IInfoDisplay
 		}
 	}
 
-        public Infobar(DataBook db) : base(Gtk.Orientation.Horizontal, 0)
-        {
+	public Infobar(DataBook db) : base(Gtk.Orientation.Horizontal, 0)
+	{
 		dataBook = db;
 
 		MessageLabel = new Label();

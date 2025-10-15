@@ -31,36 +31,36 @@ public class GuiPlugin : Plugin
 
 	}
 
-        protected Widget GetDataBook(Window win)
-        {
-                Gtk.Box vbox = (Gtk.Box)win.Child;
-                foreach (Widget child in vbox.Children) {
-                        if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
-                                foreach (Widget child1 in box.Children) {
-                                        if (child1.GetType().ToString() == "Bless.Gui.DataBook")
-                                                return child1;
-                                }
-                        }
+	protected Widget GetDataBook(Window win)
+	{
+		Gtk.Box vbox = (Gtk.Box)win.Child;
+		foreach (Widget child in vbox.Children) {
+			if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
+				foreach (Widget child1 in box.Children) {
+					if (child1.GetType().ToString() == "Bless.Gui.DataBook")
+						return child1;
+				}
+			}
 
-                }
-                return null;
-        }
+		}
+		return null;
+	}
 
-        protected Widget GetMenuBar(Window win)
-        {
-                Gtk.Box vbox = (Gtk.Box)win.Child;
-                foreach (Widget child in vbox.Children) {
-                        if (child.GetType() == typeof(MenuBar)) {
-                                return child;
-                        }
-                }
+	protected Widget GetMenuBar(Window win)
+	{
+		Gtk.Box vbox = (Gtk.Box)win.Child;
+		foreach (Widget child in vbox.Children) {
+			if (child.GetType() == typeof(MenuBar)) {
+				return child;
+			}
+		}
 
-                return null;
-        }
+		return null;
+	}
 
-        protected Widget GetWidgetGroup(Window win, int n)
-        {
-                Gtk.Box vbox = (Gtk.Box)win.Child;
+	protected Widget GetWidgetGroup(Window win, int n)
+	{
+		Gtk.Box vbox = (Gtk.Box)win.Child;
 		int i = 0;
 		foreach (Widget child in vbox.Children) {
 			//System.Console.WriteLine("Child: {0}", child.GetType().ToString());
@@ -75,19 +75,19 @@ public class GuiPlugin : Plugin
 		return null;
 	}
 
-        protected Widget GetSideWidgetGroup(Window win, int n)
-        {
-                Gtk.Box vbox = (Gtk.Box)win.Child;
-                int i = 0;
-                Gtk.Box hbox = null;
+	protected Widget GetSideWidgetGroup(Window win, int n)
+	{
+		Gtk.Box vbox = (Gtk.Box)win.Child;
+		int i = 0;
+		Gtk.Box hbox = null;
 
-                foreach (Widget child in vbox.Children) {
-                        System.Console.WriteLine("Child: {0}", child.GetType().ToString());
-                        if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
-                                hbox = box;
-                                break;
-                        }
-                }
+		foreach (Widget child in vbox.Children) {
+			System.Console.WriteLine("Child: {0}", child.GetType().ToString());
+			if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
+				hbox = box;
+				break;
+			}
+		}
 		if (hbox == null)
 			return null;
 

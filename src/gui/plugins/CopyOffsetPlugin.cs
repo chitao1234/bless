@@ -192,7 +192,7 @@ class CopyOffsetPreferences : IPluginPreferences
 
 class CopyOffsetPreferencesWidget : Gtk.Box
 {
-        Gtk.ComboBox numberBaseCombo;
+	Gtk.ComboBox numberBaseCombo;
 
 	int BaseToActiveIndex(int number_base) {
 		switch (number_base) {
@@ -215,24 +215,24 @@ class CopyOffsetPreferencesWidget : Gtk.Box
 		}
 	}
 
-        public CopyOffsetPreferencesWidget() : base(Gtk.Orientation.Vertical, 0)
-        {
-                // Use a hbox inside an vbox to avoid expanding vertically.
-                Gtk.Box hbox = new Gtk.Box(Gtk.Orientation.Horizontal, 0);
-                Gtk.Label label = new Gtk.Label(Catalog.GetString("Number base:"));
-                numberBaseCombo = Gtk.ComboBox.NewText();
-                numberBaseCombo.AppendText("2");
-                numberBaseCombo.AppendText("8");
-                numberBaseCombo.AppendText("10");
-                numberBaseCombo.AppendText("16");
+	public CopyOffsetPreferencesWidget() : base(Gtk.Orientation.Vertical, 0)
+	{
+		// Use a hbox inside an vbox to avoid expanding vertically.
+		Gtk.Box hbox = new Gtk.Box(Gtk.Orientation.Horizontal, 0);
+		Gtk.Label label = new Gtk.Label(Catalog.GetString("Number base:"));
+		numberBaseCombo = Gtk.ComboBox.NewText();
+		numberBaseCombo.AppendText("2");
+		numberBaseCombo.AppendText("8");
+		numberBaseCombo.AppendText("10");
+		numberBaseCombo.AppendText("16");
 
-                hbox.PackStart(label, false, false, 6);
-                hbox.PackStart(numberBaseCombo, false, false, 6);
+		hbox.PackStart(label, false, false, 6);
+		hbox.PackStart(numberBaseCombo, false, false, 6);
 
-                this.PackStart(hbox, true, false, 6);
+		this.PackStart(hbox, true, false, 6);
 
-                this.ShowAll();
-        }
+		this.ShowAll();
+	}
 }
 
 } //end namespace

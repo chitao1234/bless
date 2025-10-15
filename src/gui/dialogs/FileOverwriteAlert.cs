@@ -33,14 +33,14 @@ public class FileOverwriteAlert : Alert
 	public FileOverwriteAlert(string primary, Gtk.Window parent)
 			: base(string.Format(msg1, primary), msg2, parent)
 	{
-                image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
+		image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
 
-                Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
-                cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
-                cancelButton.AlwaysShowImage = true;
-                Gtk.Button replaceButton = (Gtk.Button)this.AddButton(Catalog.GetString("Replace"), ResponseType.Ok);
-                replaceButton.Image = Gtk.Image.NewFromIconName("document-save", Gtk.IconSize.Button);
-                replaceButton.AlwaysShowImage = true;
+		Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
+		cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
+		cancelButton.AlwaysShowImage = true;
+		Gtk.Button replaceButton = (Gtk.Button)this.AddButton(Catalog.GetString("Replace"), ResponseType.Ok);
+		replaceButton.Image = Gtk.Image.NewFromIconName("document-save", Gtk.IconSize.Button);
+		replaceButton.AlwaysShowImage = true;
 
 		this.DefaultResponse = ResponseType.Cancel;
 

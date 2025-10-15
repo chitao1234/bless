@@ -125,8 +125,8 @@ public class StatisticsWidget : Gtk.Box
 	DataBook dataBook;
 	Hashtable info;
 
-        public StatisticsWidget(DataBook db) : base(Gtk.Orientation.Vertical, 0)
-        {
+	public StatisticsWidget(DataBook db) : base(Gtk.Orientation.Vertical, 0)
+	{
 		info = new Hashtable();
 		dataBook = db;
 		dataBook.SwitchPage += new SwitchPageHandler(OnSwitchPage);

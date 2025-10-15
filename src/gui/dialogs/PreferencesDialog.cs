@@ -60,13 +60,13 @@ public class PreferencesDialog : Dialog
 
 		this.Modal = false;
 		this.TransientFor = parent;
-                this.BorderWidth = 6;
-                Gtk.Button closeButton = (Gtk.Button)this.AddButton(Catalog.GetString("Close"), ResponseType.Close);
-                closeButton.Image = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Button);
-                closeButton.AlwaysShowImage = true;
-                this.Response += new ResponseHandler(OnDialogResponse);
-                this.ContentArea.Add(PreferencesPaned);
-                this.ContentArea.ShowAll();
+		this.BorderWidth = 6;
+		Gtk.Button closeButton = (Gtk.Button)this.AddButton(Catalog.GetString("Close"), ResponseType.Close);
+		closeButton.Image = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Button);
+		closeButton.AlwaysShowImage = true;
+		this.Response += new ResponseHandler(OnDialogResponse);
+		this.ContentArea.Add(PreferencesPaned);
+		this.ContentArea.ShowAll();
 	}
 	
 	void LoadPreferencesTreeView()
@@ -132,7 +132,7 @@ public class PreferencesDialog : Dialog
 
 class GeneralPreferences : IPluginPreferences
 {
-        [Gtk.Builder.Object] Gtk.Box GeneralPreferencesVBox;
+	[Gtk.Builder.Object] Gtk.Box GeneralPreferencesVBox;
 
 	[Gtk.Builder.Object] Entry LayoutFileEntry;
 	[Gtk.Builder.Object] CheckButton UseCurrentLayoutCheckButton;
@@ -292,7 +292,7 @@ class SessionPreferences : IPluginPreferences
 {
 	Preferences prefs;
 
-        [Gtk.Builder.Object] Gtk.Box SessionPreferencesVBox;
+	[Gtk.Builder.Object] Gtk.Box SessionPreferencesVBox;
 	
 	[Gtk.Builder.Object] CheckButton LoadPreviousSessionCheckButton;
 	[Gtk.Builder.Object] CheckButton AskBeforeLoadingSessionCheckButton;
@@ -408,9 +408,9 @@ class SessionPreferences : IPluginPreferences
 
 class UndoPreferences : IPluginPreferences
 {
-        Preferences prefs;
+	Preferences prefs;
 
-        [Gtk.Builder.Object] Gtk.Box UndoPreferencesVBox;
+	[Gtk.Builder.Object] Gtk.Box UndoPreferencesVBox;
 	
 	[Gtk.Builder.Object] RadioButton UndoLimitedRadioButton;
 	[Gtk.Builder.Object] RadioButton UndoUnlimitedRadioButton;

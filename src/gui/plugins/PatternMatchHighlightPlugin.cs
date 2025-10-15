@@ -196,18 +196,18 @@ class PatternMatchPreferences : IPluginPreferences
 
 class PreferencesWidget : Gtk.Box
 {
-        Gtk.CheckButton enableHighlightCheckButton;
+	Gtk.CheckButton enableHighlightCheckButton;
 
-        public Gtk.CheckButton EnableHighlightCheckButton {
-                get { return enableHighlightCheckButton; }
-        }
+	public Gtk.CheckButton EnableHighlightCheckButton {
+		get { return enableHighlightCheckButton; }
+	}
 
-        public PreferencesWidget() : base(Gtk.Orientation.Horizontal, 6)
-        {
-                enableHighlightCheckButton = new Gtk.CheckButton("Highlight matches of selection pattern");
-                this.PackStart(enableHighlightCheckButton, false, false, 6);
-                this.ShowAll();
-        }
+	public PreferencesWidget() : base(Gtk.Orientation.Horizontal, 6)
+	{
+		enableHighlightCheckButton = new Gtk.CheckButton("Highlight matches of selection pattern");
+		this.PackStart(enableHighlightCheckButton, false, false, 6);
+		this.ShowAll();
+	}
 }
 
 } // end namespace

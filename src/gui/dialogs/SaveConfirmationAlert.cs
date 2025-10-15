@@ -31,15 +31,15 @@ public class SaveConfirmationAlert : Alert
 			: base(string.Format(Catalog.GetString("Save changes to file '{0}' before closing?"), primary),
 				   Catalog.GetString("If you don't save, all changes made since the last save will be lost."), parent)
 	{
-                image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
+		image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
 
-                this.AddButton(Catalog.GetString("Close without Saving"), ResponseType.No);
-                Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
-                cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
-                cancelButton.AlwaysShowImage = true;
-                Gtk.Button saveButton = (Gtk.Button)this.AddButton(Catalog.GetString("Save"), ResponseType.Ok);
-                saveButton.Image = Gtk.Image.NewFromIconName("document-save", Gtk.IconSize.Button);
-                saveButton.AlwaysShowImage = true;
+		this.AddButton(Catalog.GetString("Close without Saving"), ResponseType.No);
+		Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
+		cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
+		cancelButton.AlwaysShowImage = true;
+		Gtk.Button saveButton = (Gtk.Button)this.AddButton(Catalog.GetString("Save"), ResponseType.Ok);
+		saveButton.Image = Gtk.Image.NewFromIconName("document-save", Gtk.IconSize.Button);
+		saveButton.AlwaysShowImage = true;
 
 		this.DefaultResponse = ResponseType.Cancel;
 

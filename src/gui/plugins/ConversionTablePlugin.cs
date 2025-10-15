@@ -114,7 +114,7 @@ public class ConversionTablePlugin : GuiPlugin
 public class ConversionTable: Gtk.Box
 {
 
-        [Gtk.Builder.Object] Gtk.Grid ConversionTableWidget;
+	[Gtk.Builder.Object] Gtk.Grid ConversionTableWidget;
 
 	[Gtk.Builder.Object] Gtk.Entry Signed8bitEntry;
 	[Gtk.Builder.Object] Gtk.Entry Unsigned8bitEntry;
@@ -140,8 +140,8 @@ public class ConversionTable: Gtk.Box
 	bool littleEndian;
 	bool unsignedAsHex;
 
-        public ConversionTable(DataBook db) : base(Gtk.Orientation.Vertical, 0)
-        {
+	public ConversionTable(DataBook db) : base(Gtk.Orientation.Vertical, 0)
+	{
 		Gtk.Builder builder = new Gtk.Builder();
 		builder.AddFromFile(FileResourcePath.GetDataPath("ui", "ConversionTablePlugin.ui"));
 		builder.Autoconnect(this);
@@ -252,15 +252,15 @@ public class ConversionTable: Gtk.Box
 
 
 	// whether a widget in the table has the focus
-        bool IsFocusInTable()
-        {
-                foreach (Gtk.Widget child in  ConversionTableWidget.Children) {
-                        if (child.HasFocus)
-                                return true;
-                }
+	bool IsFocusInTable()
+	{
+		foreach (Gtk.Widget child in  ConversionTableWidget.Children) {
+			if (child.HasFocus)
+				return true;
+		}
 
-                return false;
-        }
+		return false;
+	}
 
 	void OnLittleEndianToggled(object o, EventArgs args)
 	{

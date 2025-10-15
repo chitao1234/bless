@@ -69,10 +69,10 @@ public class ProgressDisplayPlugin : GuiPlugin
 public class ProgressDisplayWidget : Gtk.Box, IProgressDisplay
 {
 
-        public ProgressDisplayWidget() : base(Gtk.Orientation.Vertical, 6)
-        {
+	public ProgressDisplayWidget() : base(Gtk.Orientation.Vertical, 6)
+	{
 
-        }
+	}
 
 	///<summary>
 	/// Get a callback for a new progress bar
@@ -81,7 +81,7 @@ public class ProgressDisplayWidget : Gtk.Box, IProgressDisplay
 	{
 		ProgressDisplayBar pdb = new ProgressDisplayBar();
 
-                this.PackStart(pdb, false, false, 0);
+		this.PackStart(pdb, false, false, 0);
 		pdb.DestroyEvent += OnProgressDisplayBarDestroyed;
 
 		return pdb.Update;
@@ -100,21 +100,21 @@ public class ProgressDisplayWidget : Gtk.Box, IProgressDisplay
 
 public class ProgressDisplayBar : Gtk.Box {
 
-        [Gtk.Builder.Object] Gtk.Box ProgressBarHBox;
-        [Gtk.Builder.Object] Gtk.Button CancelButton;
-        [Gtk.Builder.Object] Gtk.ProgressBar ProgressBar;
+	[Gtk.Builder.Object] Gtk.Box ProgressBarHBox;
+	[Gtk.Builder.Object] Gtk.Button CancelButton;
+	[Gtk.Builder.Object] Gtk.ProgressBar ProgressBar;
 
-        bool cancelClicked;
+	bool cancelClicked;
 
-        public ProgressDisplayBar() : base(Gtk.Orientation.Horizontal, 0)
-        {
-                Gtk.Builder builder = new Gtk.Builder();
-                builder.AddFromFile(FileResourcePath.GetDataPath("ui", "ProgressDisplayPlugin.ui"));
-                builder.Autoconnect(this);
+	public ProgressDisplayBar() : base(Gtk.Orientation.Horizontal, 0)
+	{
+		Gtk.Builder builder = new Gtk.Builder();
+		builder.AddFromFile(FileResourcePath.GetDataPath("ui", "ProgressDisplayPlugin.ui"));
+		builder.Autoconnect(this);
 
-                this.Add(ProgressBarHBox);
-                this.Hide();
-        }
+		this.Add(ProgressBarHBox);
+		this.Hide();
+	}
 
 	///<summary>
 	/// Handles the various progress actions

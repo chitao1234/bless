@@ -220,8 +220,8 @@ public class DataBook : Gtk.Notebook
 ///<summary>A widget to display on each tab label</summary>
 class DataBookTabLabel : Gtk.Box
 {
-        Gtk.Label label;
-        Gtk.Button closeButton;
+	Gtk.Label label;
+	Gtk.Button closeButton;
 	DataView dataView;
 	CloseViewDelegate doCloseFile;
 
@@ -234,28 +234,28 @@ class DataBookTabLabel : Gtk.Box
 		get { return closeButton; }
 	}
 
-        public DataBookTabLabel(DataView dv, CloseViewDelegate deleg, string str) : base(Gtk.Orientation.Horizontal, 2)
-        {
-                dataView = dv;
-                doCloseFile = deleg;
+	public DataBookTabLabel(DataView dv, CloseViewDelegate deleg, string str) : base(Gtk.Orientation.Horizontal, 2)
+	{
+		dataView = dv;
+		doCloseFile = deleg;
 
-                dataView.NotificationChanged += OnNotificationChanged;
+		dataView.NotificationChanged += OnNotificationChanged;
 
-                label = new Gtk.Label(str);
-                label.UseMarkup = true;
-                label.UseUnderline = false;
+		label = new Gtk.Label(str);
+		label.UseMarkup = true;
+		label.UseUnderline = false;
 
-                closeButton = new Gtk.Button();
-                Gtk.Image img = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Menu);
-                img.SetSizeRequest(8, 8);
-                closeButton.Image = img;
-                closeButton.AlwaysShowImage = true;
+		closeButton = new Gtk.Button();
+		Gtk.Image img = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Menu);
+		img.SetSizeRequest(8, 8);
+		closeButton.Image = img;
+		closeButton.AlwaysShowImage = true;
 
-                closeButton.Relief = Gtk.ReliefStyle.None;
-                closeButton.Clicked += OnCloseClicked;
-                closeButton.CanFocus = false;
+		closeButton.Relief = Gtk.ReliefStyle.None;
+		closeButton.Clicked += OnCloseClicked;
+		closeButton.CanFocus = false;
 
-                this.PackStart(label, false, false, 0);
+		this.PackStart(label, false, false, 0);
 		this.PackStart(closeButton, false, false, 0);
 
 		this.ShowAll();
