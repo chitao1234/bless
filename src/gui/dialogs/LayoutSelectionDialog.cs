@@ -77,11 +77,14 @@ public class LayoutSelectionDialog : Dialog {
 		this.DefaultHeight = 300;
 		this.Modal = false;
 		this.BorderWidth = 6;
-		this.HasSeparator = false;
-		this.AddButton(Gtk.Stock.Close, ResponseType.Close);
-		this.AddButton(Gtk.Stock.Ok, ResponseType.Ok);
+		Gtk.Button closeButton = (Gtk.Button)this.AddButton(Catalog.GetString("Close"), ResponseType.Close);
+		closeButton.Image = Gtk.Image.NewFromIconName("window-close", Gtk.IconSize.Button);
+		closeButton.AlwaysShowImage = true;
+		Gtk.Button okButton = (Gtk.Button)this.AddButton(Catalog.GetString("OK"), ResponseType.Ok);
+		okButton.Image = Gtk.Image.NewFromIconName("dialog-ok", Gtk.IconSize.Button);
+		okButton.AlwaysShowImage = true;
 		this.Response += new ResponseHandler(OnDialogResponse);
-		this.VBox.Add(LayoutSelectionPaned);
+		this.ContentArea.Add(LayoutSelectionPaned);
 	}
 
 	///<summary>Populate the layout list</summary>

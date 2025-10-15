@@ -111,10 +111,10 @@ public class ConversionTablePlugin : GuiPlugin
 
 
 ///<summary> A widget to convert the data at the current offset to various types</summary>
-public class ConversionTable: Gtk.HBox
+public class ConversionTable: Gtk.Box
 {
 
-	[Gtk.Builder.Object] Gtk.Table ConversionTableWidget;
+	[Gtk.Builder.Object] Gtk.Grid ConversionTableWidget;
 
 	[Gtk.Builder.Object] Gtk.Entry Signed8bitEntry;
 	[Gtk.Builder.Object] Gtk.Entry Unsigned8bitEntry;
@@ -140,7 +140,7 @@ public class ConversionTable: Gtk.HBox
 	bool littleEndian;
 	bool unsignedAsHex;
 
-	public ConversionTable(DataBook db)
+	public ConversionTable(DataBook db) : base(Gtk.Orientation.Vertical, 0)
 	{
 		Gtk.Builder builder = new Gtk.Builder();
 		builder.AddFromFile(FileResourcePath.GetDataPath("ui", "ConversionTablePlugin.ui"));
@@ -255,12 +255,7 @@ public class ConversionTable: Gtk.HBox
 	bool IsFocusInTable()
 	{
 		foreach (Gtk.Widget child in  ConversionTableWidget.Children) {
-			Widget realChild = child;
-
-			if (child.GetType() == typeof(Gtk.Alignment))
-				realChild = (child as Gtk.Alignment).Child;
-
-			if (realChild.HasFocus)
+			if (child.HasFocus)
 				return true;
 		}
 

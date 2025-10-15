@@ -250,7 +250,7 @@ public class InfobarPlugin : GuiPlugin
 ///<summary>
 /// An advanced statusbar for Bless
 ///</summary>
-public class Infobar : Gtk.HBox, IInfoDisplay
+public class Infobar : Gtk.Box, IInfoDisplay
 {
 	Label MessageLabel;
 	Label OffsetLabel;
@@ -302,7 +302,7 @@ public class Infobar : Gtk.HBox, IInfoDisplay
 		}
 	}
 
-	public Infobar(DataBook db)
+	public Infobar(DataBook db) : base(Gtk.Orientation.Horizontal, 0)
 	{
 		dataBook = db;
 

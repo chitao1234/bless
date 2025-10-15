@@ -187,8 +187,8 @@ public class FileOperationsPlugin : GuiPlugin
 	{
 		// Get path of file(s) to open
 		Gtk.FileChooserDialog fs = new Gtk.FileChooserDialog(Catalog.GetString("Open File(s)"), mainWindow, FileChooserAction.Open,
-								   Gtk.Stock.Cancel, ResponseType.Cancel,
-								   Gtk.Stock.Open, ResponseType.Accept);
+															 Catalog.GetString("Cancel"), ResponseType.Cancel,
+															 Catalog.GetString("Open"), ResponseType.Accept);
 
 		fs.SelectMultiple = true;
 		ResponseType result = (ResponseType)fs.Run();

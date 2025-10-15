@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <interface>
   <object class="GtkListStore" id="model3">
     <columns>
@@ -41,10 +41,11 @@
       </row>
     </data>
   </object>
-  <object class="GtkHBox" id="BitwiseOperationsHBox">
+  <object class="GtkBox" id="BitwiseOperationsHBox">
     <property name="visible">True</property>
     <property name="border_width">6</property>
     <property name="spacing">6</property>
+    <property name="orientation">horizontal</property>
     <child>
       <object class="GtkEventBox" id="SourceLabelEB">
         <property name="visible">True</property>
@@ -120,7 +121,6 @@
       <object class="GtkButton" id="DoOperationButton">
         <property name="visible">True</property>
         <property name="label" translatable="no">gtk-execute</property>
-        <property name="use_stock">True</property>
         <signal handler="OnDoOperationClicked" name="clicked"/>
       </object>
       <packing>
@@ -139,7 +139,7 @@
         <child>
           <object class="GtkImage" id="image8">
             <property name="visible">True</property>
-            <property name="stock">gtk-close</property>
+            <property name="icon-name">window-close</property>
             <property name="icon_size">1</property>
           </object>
         </child>

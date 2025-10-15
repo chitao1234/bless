@@ -145,7 +145,7 @@ public class FileBuffer: BaseBuffer
 #endif
 
 		Stream stream = new FileStream(filename, FileMode.Open, FileAccess.Read,
-		                               FileShare.ReadWrite);
+									   FileShare.ReadWrite);
 		
 		if (stream.CanSeek == false)
 			throw new NotSupportedException("File object doesn't support seeking.");

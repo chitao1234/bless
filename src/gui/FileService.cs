@@ -305,8 +305,8 @@ public class FileService
 
 		// otherwise prompt user for a name
 		Gtk.FileChooserDialog fs = new Gtk.FileChooserDialog(Catalog.GetString("Save File As"), mainWindow, FileChooserAction.Save,
-								   Gtk.Stock.Cancel, ResponseType.Cancel,
-								   Gtk.Stock.Save, ResponseType.Accept);
+								   Catalog.GetString("Cancel"), ResponseType.Cancel,
+								   Catalog.GetString("Save"), ResponseType.Accept);
 
 		bool done = false;
 		bool fileSaved = true;

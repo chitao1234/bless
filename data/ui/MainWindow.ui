@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <interface>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
@@ -7,8 +7,9 @@
     <property name="default_height">400</property>
     <signal handler="OnMainWindowDeleteEvent" name="delete_event"/>
     <child>
-      <object class="GtkVBox" id="MainVBox">
+      <object class="GtkBox" id="MainVBox">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <placeholder/>
         </child>
@@ -16,8 +17,9 @@
           <placeholder/>
         </child>
         <child>
-          <object class="GtkHBox" id="DataViewBox">
+          <object class="GtkBox" id="DataViewBox">
             <property name="visible">True</property>
+            <property name="orientation">horizontal</property>
             <child>
               <placeholder/>
             </child>

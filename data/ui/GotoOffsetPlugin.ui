@@ -1,9 +1,10 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <object class="GtkHBox" id="GotoOffsetHBox">
+  <object class="GtkBox" id="GotoOffsetHBox">
     <property name="visible">True</property>
     <property name="border_width">6</property>
     <property name="spacing">6</property>
+    <property name="orientation">horizontal</property>
     <child>
       <object class="GtkLabel" id="label80">
         <property name="visible">True</property>
@@ -35,37 +36,33 @@
         <property name="focus_on_click">False</property>
         <signal handler="OnGotoOffsetClicked" name="clicked"/>
         <child>
-          <object class="GtkAlignment" id="alignment54">
+          <object class="GtkBox" id="hbox34">
             <property name="visible">True</property>
-            <property name="xscale">0</property>
-            <property name="yscale">0</property>
+            <property name="spacing">2</property>
+            <property name="orientation">horizontal</property>
+            <property name="hexpand">False</property>
+            <property name="vexpand">False</property>
             <child>
-              <object class="GtkHBox" id="hbox34">
+              <object class="GtkImage" id="image1333">
                 <property name="visible">True</property>
-                <property name="spacing">2</property>
-                <child>
-                  <object class="GtkImage" id="image1333">
-                    <property name="visible">True</property>
-                    <property name="stock">gtk-jump-to</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label81">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">Go to Offset</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
+                <property name="icon-name">go-jump</property>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label81">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Go to Offset</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
         </child>
@@ -87,7 +84,7 @@
         <child>
           <object class="GtkImage" id="image1334">
             <property name="visible">True</property>
-            <property name="stock">gtk-close</property>
+            <property name="icon-name">window-close</property>
             <property name="icon_size">1</property>
           </object>
         </child>

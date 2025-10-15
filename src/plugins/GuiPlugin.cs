@@ -33,11 +33,10 @@ public class GuiPlugin : Plugin
 
 	protected Widget GetDataBook(Window win)
 	{
-		VBox vbox = (VBox)win.Child;
+		Gtk.Box vbox = (Gtk.Box)win.Child;
 		foreach (Widget child in vbox.Children) {
-			//System.Console.WriteLine("Child: {0}", child.GetType().ToString());
-			if (child.GetType() == typeof(HBox)) {
-				foreach (Widget child1 in ((HBox)child).Children) {
+			if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
+				foreach (Widget child1 in box.Children) {
 					if (child1.GetType().ToString() == "Bless.Gui.DataBook")
 						return child1;
 				}
@@ -49,9 +48,8 @@ public class GuiPlugin : Plugin
 
 	protected Widget GetMenuBar(Window win)
 	{
-		VBox vbox = (VBox)win.Child;
+		Gtk.Box vbox = (Gtk.Box)win.Child;
 		foreach (Widget child in vbox.Children) {
-			//System.Console.WriteLine("Child: {0}", child.GetType().ToString());
 			if (child.GetType() == typeof(MenuBar)) {
 				return child;
 			}
@@ -62,7 +60,7 @@ public class GuiPlugin : Plugin
 
 	protected Widget GetWidgetGroup(Window win, int n)
 	{
-		VBox vbox = (VBox)win.Child;
+		Gtk.Box vbox = (Gtk.Box)win.Child;
 		int i = 0;
 		foreach (Widget child in vbox.Children) {
 			//System.Console.WriteLine("Child: {0}", child.GetType().ToString());
@@ -79,14 +77,14 @@ public class GuiPlugin : Plugin
 
 	protected Widget GetSideWidgetGroup(Window win, int n)
 	{
-		VBox vbox = (VBox)win.Child;
+		Gtk.Box vbox = (Gtk.Box)win.Child;
 		int i = 0;
-		HBox hbox = null;
+		Gtk.Box hbox = null;
 
 		foreach (Widget child in vbox.Children) {
 			System.Console.WriteLine("Child: {0}", child.GetType().ToString());
-			if (child.GetType().ToString() == "Gtk.HBox") {
-				hbox = (HBox)child;
+			if (child is Gtk.Box box && box.Orientation == Gtk.Orientation.Horizontal) {
+				hbox = box;
 				break;
 			}
 		}

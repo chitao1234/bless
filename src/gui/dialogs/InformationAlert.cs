@@ -20,6 +20,7 @@
  */
 using System;
 using Gtk;
+using Mono.Unix;
 
 namespace Bless.Gui.Dialogs {
 
@@ -30,8 +31,10 @@ public class InformationAlert : Alert
 	public InformationAlert(string primary, string secondary, Gtk.Window parent)
 			: base(primary, secondary, parent)
 	{
-		image.SetFromStock(Gtk.Stock.DialogInfo, Gtk.IconSize.Dialog);
-		this.AddButton(Gtk.Stock.Ok, ResponseType.Ok);
+		image.SetFromIconName("dialog-information", Gtk.IconSize.Dialog);
+		Gtk.Button okButton = (Gtk.Button)this.AddButton(Catalog.GetString("OK"), ResponseType.Ok);
+		okButton.Image = Gtk.Image.NewFromIconName("dialog-ok", Gtk.IconSize.Button);
+		okButton.AlwaysShowImage = true;
 
 		this.ShowAll();
 	}

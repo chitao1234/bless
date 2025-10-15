@@ -32,10 +32,14 @@ public class RevertConfirmationAlert : Alert
 			: base(string.Format(Catalog.GetString("Revert file '{0}' to its last saved state?"), primary),
 				   Catalog.GetString("If you revert, all changes made since the last save will be lost."), parent)
 	{
-		image.SetFromStock(Gtk.Stock.DialogWarning, Gtk.IconSize.Dialog);
+		image.SetFromIconName("dialog-warning", Gtk.IconSize.Dialog);
 
-		this.AddButton(Gtk.Stock.Cancel, ResponseType.Cancel);
-		this.AddButton(Gtk.Stock.RevertToSaved, ResponseType.Ok);
+		Gtk.Button cancelButton = (Gtk.Button)this.AddButton(Catalog.GetString("Cancel"), ResponseType.Cancel);
+		cancelButton.Image = Gtk.Image.NewFromIconName("dialog-cancel", Gtk.IconSize.Button);
+		cancelButton.AlwaysShowImage = true;
+		Gtk.Button revertButton = (Gtk.Button)this.AddButton(Catalog.GetString("Revert"), ResponseType.Ok);
+		revertButton.Image = Gtk.Image.NewFromIconName("document-revert", Gtk.IconSize.Button);
+		revertButton.AlwaysShowImage = true;
 
 		this.ShowAll();
 	}

@@ -91,7 +91,7 @@ public class RedBlackTree<K, V> where K:IComparable<K>
 			get { return color; }
 			set { color = value; }
 		}
-	    
+		
 		public Node(K key, V val, Color color)
 		{
 			this.key = key;
@@ -283,7 +283,7 @@ public class RedBlackTree<K, V> where K:IComparable<K>
 			else if (cmp < 0) x = x.Left;
 			else if (cmp > 0) x = x.Right;
 		}
-		   
+		
 		return null;
 	}
 	
@@ -319,7 +319,7 @@ public class RedBlackTree<K, V> where K:IComparable<K>
 			
 			// push red right if necessary
 			if (!IsRed(h.Left) && h.Left != null && !IsRed(h.Left.Left))
-				h = MoveRedLeft(h);                           
+				h = MoveRedLeft(h);
 			// move down (left)
 			h.Left = Delete(h.Left, key);
 		}
@@ -349,7 +349,7 @@ public class RedBlackTree<K, V> where K:IComparable<K>
 			if (cmp == 0) {
 				INode minNode = FindMinNode(h.Right);
 				// replace current node with successor key, value
-      			h.Key = minNode.Key;                               
+				h.Key = minNode.Key;
 				h.Values = minNode.Values; 
 				// delete successor
 				h.Right = DeleteMin(h.Right);

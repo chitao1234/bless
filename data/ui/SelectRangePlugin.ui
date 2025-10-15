@@ -1,9 +1,10 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <object class="GtkHBox" id="SelectRangeHBox">
+  <object class="GtkBox" id="SelectRangeHBox">
     <property name="visible">True</property>
     <property name="border_width">6</property>
     <property name="spacing">6</property>
+    <property name="orientation">horizontal</property>
     <child>
       <object class="GtkLabel" id="label82">
         <property name="visible">True</property>
@@ -28,7 +29,7 @@
     <child>
       <object class="GtkLabel" id="label83">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">to/&#xB1;length</property>
+        <property name="label" translatable="yes">to/±length</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -56,37 +57,33 @@
         <property name="focus_on_click">False</property>
         <signal handler="OnSelectButtonClicked" name="clicked"/>
         <child>
-          <object class="GtkAlignment" id="alignment55">
+          <object class="GtkBox" id="hbox36">
             <property name="visible">True</property>
-            <property name="xscale">0</property>
-            <property name="yscale">0</property>
+            <property name="spacing">2</property>
+            <property name="orientation">horizontal</property>
+            <property name="hexpand">False</property>
+            <property name="vexpand">False</property>
             <child>
-              <object class="GtkHBox" id="hbox36">
+              <object class="GtkImage" id="image1642">
                 <property name="visible">True</property>
-                <property name="spacing">2</property>
-                <child>
-                  <object class="GtkImage" id="image1642">
-                    <property name="visible">True</property>
-                    <property name="stock">gtk-apply</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label84">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">Select</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
+                <property name="icon-name">emblem-ok</property>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label84">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Select</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
         </child>
@@ -107,7 +104,7 @@
         <child>
           <object class="GtkImage" id="image1643">
             <property name="visible">True</property>
-            <property name="stock">gtk-close</property>
+            <property name="icon-name">window-close</property>
             <property name="icon_size">1</property>
           </object>
         </child>
