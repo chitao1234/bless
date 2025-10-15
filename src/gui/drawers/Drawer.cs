@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Specialized;
+using Cairo;
 using Gtk;
 using Gdk;
 using Pango;
@@ -173,16 +174,16 @@ public abstract class Drawer {
 	protected Pango.FontDescription fontDescription;
 	protected Information info;
 
-	protected Gdk.Pixmap[,] pixmapsNormal;
-	protected Gdk.Pixmap[,] pixmapsHighlight;
-	protected StringCollection pixmapIds;
+        protected ImageSurface[,] pixmapsNormal;
+        protected ImageSurface[,] pixmapsHighlight;
+        protected StringCollection pixmapIds;
 
-	// pango layout used for rendering text
-	protected Pango.Layout pangoLayout;
+        // pango layout used for rendering text
+        protected Pango.Layout pangoLayout;
 
-	protected Gdk.GC[,] backGC;
-	protected int width;
-	protected int height;
+        protected Drawer.Color[,] backgroundColors;
+        protected int width;
+        protected int height;
 
 	///<summary>Constructor</summary>
 	public Drawer(Gtk.Widget wid, Information inf)
@@ -207,24 +208,24 @@ public abstract class Drawer {
 		pangoLayout.GetPixelSize(out width, out height);
 		pangoLayout.SetText("");
 
-		// create the font pixmaps
-		InitializePixmaps();
+                // create the font glyph surfaces
+                InitializeGlyphs();
 
-		InitializeBackgroundGCs();
+                InitializeBackgroundColors();
 	}
 
-	void InitializePixmaps()
-	{
-		pixmapsNormal = new Gdk.Pixmap[2,2];
-		pixmapsHighlight = new Gdk.Pixmap[2,(int)HighlightType.Sentinel];
+        void InitializeGlyphs()
+        {
+                pixmapsNormal = new ImageSurface[2,2];
+                pixmapsHighlight = new ImageSurface[2,(int)HighlightType.Sentinel];
 
-		Drawer.Color colorFg;
-		Drawer.Color colorBg;
+                Drawer.Color colorFg;
+                Drawer.Color colorBg;
 
 		//even rows
 		colorFg = info.fgNormal[(int)RowType.Even, (int)ColumnType.Even];
 		colorBg = info.bgNormal[(int)RowType.Even, (int)ColumnType.Even];
-		pixmapsNormal[(int)RowType.Even, (int)ColumnType.Even] = CreateWrapper(colorFg, colorBg);
+                pixmapsNormal[(int)RowType.Even, (int)ColumnType.Even] = CreateWrapper(colorFg, colorBg);
 
 		colorFg = info.fgNormal[(int)RowType.Even, (int)ColumnType.Odd];
 		colorBg = info.bgNormal[(int)RowType.Even, (int)ColumnType.Odd];
@@ -257,56 +258,40 @@ public abstract class Drawer {
 		pixmapsHighlight[(int)RowType.Odd, (int)HighlightType.PatternMatch] = CreateWrapper(colorFg, colorBg);
 	}
 
-	void InitializeBackgroundGCs()
-	{
-		// initialize background GCs
-		backGC = new Gdk.GC[2, (int)Drawer.HighlightType.Sentinel];
+        void InitializeBackgroundColors()
+        {
+                backgroundColors = new Drawer.Color[2, (int)Drawer.HighlightType.Sentinel];
 
-		for (int i = 0; i < 2; i++)
-			for (int j = 0; j < (int)Drawer.HighlightType.Sentinel; j++)
-				backGC[i,j] = new Gdk.GC(widget.GdkWindow);
+                // normal
+                backgroundColors[(int)RowType.Even, (int)HighlightType.Normal] = info.bgNormal[(int)RowType.Even, (int)ColumnType.Even];
+                backgroundColors[(int)RowType.Odd, (int)HighlightType.Normal] = info.bgNormal[(int)RowType.Odd, (int)ColumnType.Even];
 
-		Drawer.Color col;
+                // selection
+                backgroundColors[(int)RowType.Even, (int)HighlightType.Selection] = info.bgHighlight[(int)RowType.Even, (int)HighlightType.Selection];
+                backgroundColors[(int)RowType.Odd, (int)HighlightType.Selection] = info.bgHighlight[(int)RowType.Odd, (int)HighlightType.Selection];
 
-		// normal
-		col = info.bgNormal[(int)RowType.Even, (int)ColumnType.Even];
-		backGC[(int)RowType.Even, (int)HighlightType.Normal].RgbFgColor = col.GdkColor;
-
-		col = info.bgNormal[(int)RowType.Odd, (int)ColumnType.Even];
-		backGC[(int)RowType.Odd, (int)HighlightType.Normal].RgbFgColor = col.GdkColor;
-
-		// selection
-		col = info.bgHighlight[(int)RowType.Even, (int)HighlightType.Selection];
-		backGC[(int)RowType.Even, (int)HighlightType.Selection].RgbFgColor = col.GdkColor;
-
-		col = info.bgHighlight[(int)RowType.Odd, (int)HighlightType.Selection];
-		backGC[(int)RowType.Odd, (int)HighlightType.Selection].RgbFgColor = col.GdkColor;
-
-		// secondary selection
-		col = info.bgHighlight[(int)RowType.Even, (int)HighlightType.PatternMatch];
-		backGC[(int)RowType.Even, (int)HighlightType.PatternMatch].RgbFgColor = col.GdkColor;
-
-		col = info.bgHighlight[(int)RowType.Odd, (int)HighlightType.PatternMatch];
-		backGC[(int)RowType.Odd, (int)HighlightType.PatternMatch].RgbFgColor = col.GdkColor;
-	}
+                // secondary selection
+                backgroundColors[(int)RowType.Even, (int)HighlightType.PatternMatch] = info.bgHighlight[(int)RowType.Even, (int)HighlightType.PatternMatch];
+                backgroundColors[(int)RowType.Odd, (int)HighlightType.PatternMatch] = info.bgHighlight[(int)RowType.Odd, (int)HighlightType.PatternMatch];
+        }
 
 	///<summary>
 	/// Wrapper around create to avoid creating pixmaps we already have
 	///</summary>
-	private Gdk.Pixmap CreateWrapper(Drawer.Color fg, Drawer.Color bg)
-	{
-		string id = PixmapManager.Instance.GetPixmapId(this.GetType(), info, fg.GdkColor, bg.GdkColor);
+        private ImageSurface CreateWrapper(Drawer.Color fg, Drawer.Color bg)
+        {
+                string id = PixmapManager.Instance.GetPixmapId(this.GetType(), info, fg.GdkColor, bg.GdkColor);
 
-		Gdk.Pixmap pix = PixmapManager.Instance.GetPixmap(id);
-		if (pix == null) {
-			pix = Create(fg.GdkColor, bg.GdkColor); // can be null for DummyDrawer
-			if (pix != null) {
-				PixmapManager.Instance.AddPixmap(id, pix);
-				PixmapManager.Instance.ReferencePixmap(id);
-				pixmapIds.Add(id);
-			}
-		}
-		else {
+                ImageSurface pix = PixmapManager.Instance.GetPixmap(id);
+                if (pix == null) {
+                        pix = Create(fg.GdkColor, bg.GdkColor); // can be null for DummyDrawer
+                        if (pix != null) {
+                                PixmapManager.Instance.AddPixmap(id, pix);
+                                PixmapManager.Instance.ReferencePixmap(id);
+                                pixmapIds.Add(id);
+                        }
+                }
+                else {
 			PixmapManager.Instance.ReferencePixmap(id);
 			pixmapIds.Add(id);
 		}
@@ -314,27 +299,27 @@ public abstract class Drawer {
 		return pix;
 	}
 
-	///<summary>Creates a pixmap with the drawn data</summary>
-	abstract protected Gdk.Pixmap Create(Gdk.Color fg, Gdk.Color bg);
+        ///<summary>Creates a surface with the drawn data</summary>
+        abstract protected ImageSurface Create(Gdk.Color fg, Gdk.Color bg);
 
-	///<summary>Draws the a byte</summary>
+        ///<summary>Draws the a byte</summary>
 
-	abstract protected void Draw(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, Gdk.Pixmap pix);
+        abstract protected void Draw(Cairo.Context cr, int x, int y, byte b, ImageSurface surface);
 
-	public void DrawNormal(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, RowType rowType, ColumnType colType)
-	{
-		Draw(gc, dest, x, y, b, pixmapsNormal[(int)rowType, (int)colType]);
-	}
+        public void DrawNormal(Cairo.Context cr, int x, int y, byte b, RowType rowType, ColumnType colType)
+        {
+                Draw(cr, x, y, b, pixmapsNormal[(int)rowType, (int)colType]);
+        }
 
-	public void DrawHighlight(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, RowType rowType, HighlightType ht)
-	{
-		Draw(gc, dest, x, y, b, pixmapsHighlight[(int)rowType, (int)ht]);
-	}
+        public void DrawHighlight(Cairo.Context cr, int x, int y, byte b, RowType rowType, HighlightType ht)
+        {
+                Draw(cr, x, y, b, pixmapsHighlight[(int)rowType, (int)ht]);
+        }
 
-	public Gdk.GC GetBackgroundGC(RowType rowType, HighlightType ht)
-	{
-		return backGC[(int)rowType, (int)ht];
-	}
+        public Drawer.Color GetBackgroundColor(RowType rowType, HighlightType ht)
+        {
+                return backgroundColors[(int)rowType, (int)ht];
+        }
 
 	public void DisposePixmaps()
 	{
@@ -366,15 +351,15 @@ public class DummyDrawer : Drawer {
 	{
 	}
 
-	protected override void Draw(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, Gdk.Pixmap pix)
-	{
+        protected override void Draw(Cairo.Context cr, int x, int y, byte b, ImageSurface surface)
+        {
 
-	}
+        }
 
-	protected override Gdk.Pixmap Create(Gdk.Color fg, Gdk.Color bg)
-	{
-		return null;
-	}
+        protected override ImageSurface Create(Gdk.Color fg, Gdk.Color bg)
+        {
+                return null;
+        }
 
 
 

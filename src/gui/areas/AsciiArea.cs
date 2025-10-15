@@ -52,90 +52,73 @@ public class AsciiArea : Area {
 		canFocus = true;
 	}
 
-	protected override void RenderRowNormal(int i, int p, int n, bool blank)
-	{
-		int rx = 0 + x;
-		int ry = i * drawer.Height + y;
-		long roffset = areaGroup.Offset + i * bpr + p;
-		bool odd;
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		Gdk.GC backOddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
+        protected override void RenderRowNormal(int i, int p, int n, bool blank)
+        {
+                int rx = x;
+                int ry = i * drawer.Height + y;
+                long roffset = areaGroup.Offset + i * bpr + p;
+                bool odd = (((roffset / bpr) % 2) == 1);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                Drawer.Color backOdd = drawer.GetBackgroundColor(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
 
+                if (blank) {
+                        if (odd)
+                                FillRectangle(backOdd, rx, ry, width, drawer.Height);
+                        else
+                                FillRectangle(backEven, rx, ry, width, drawer.Height);
+                }
 
-		// odd row?
-		odd = (((roffset / bpr) % 2) == 1);
+                Drawer.RowType rowType = odd ? Drawer.RowType.Odd : Drawer.RowType.Even;
 
-		if (blank == true) {
-			if (odd)
-				backPixmap.DrawRectangle(backOddGC, true, rx, ry, width, drawer.Height);
-			else
-				backPixmap.DrawRectangle(backEvenGC, true, rx, ry, width, drawer.Height);
-		}
+                int pos = 0;
 
-		Drawer.RowType rowType;
+                while (true) {
 
-		if (odd)
-			rowType = Drawer.RowType.Odd;
-		else
-			rowType = Drawer.RowType.Even;
+                        if (pos >= p) { //don't draw until we reach p
+                                drawer.DrawNormal(renderContext, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, Drawer.ColumnType.Even);
+                                if (--n <= 0)
+                                        break;
+                        }
 
-		int pos = 0;
+                        rx = rx + drawer.Width;
 
-		while (true) {
+                        pos++;
+                }
+        }
 
-			if (pos >= p) { //don't draw until we reach p
-				drawer.DrawNormal(backEvenGC, backPixmap, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, Drawer.ColumnType.Even);
-				if (--n <= 0)
-					break;
-			}
+        protected override void RenderRowHighlight(int i, int p, int n, bool blank, Drawer.HighlightType ht)
+        {
+                int rx = x;
+                int ry = i * drawer.Height + y;
+                long roffset = areaGroup.Offset + i * bpr + p;
+                bool odd = (((roffset / bpr) % 2) == 1);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                Drawer.Color backOdd = drawer.GetBackgroundColor(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
 
-			rx = rx + drawer.Width;
+                if (blank) {
+                        if (odd)
+                                FillRectangle(backOdd, rx, ry, width, drawer.Height);
+                        else
+                                FillRectangle(backEven, rx, ry, width, drawer.Height);
+                }
 
-			pos++;
-		}
-	}
+                Drawer.RowType rowType = odd ? Drawer.RowType.Odd : Drawer.RowType.Even;
 
-	protected override void RenderRowHighlight(int i, int p, int n, bool blank, Drawer.HighlightType ht)
-	{
-		int rx = 0 + x;
-		int ry = i * drawer.Height + y;
-		long roffset = areaGroup.Offset + i * bpr + p;
-		bool odd;
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		Gdk.GC backOddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
+                int pos = 0;
 
-		// odd row?
-		odd = (((roffset / bpr) % 2) == 1);
+                while (true) {
 
-		if (blank == true) {
-			if (odd)
-				backPixmap.DrawRectangle(backOddGC, true, rx, ry, width, drawer.Height);
-			else
-				backPixmap.DrawRectangle(backEvenGC, true, rx, ry, width, drawer.Height);
-		}
+                        if (pos >= p) { //don't draw until we reach p
+                                drawer.DrawHighlight(renderContext, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, ht);
+                                if (--n <= 0)
+                                        break;
+                        }
 
-		Drawer.RowType rowType;
+                        rx = rx + drawer.Width;
 
-		if (odd)
-			rowType = Drawer.RowType.Odd;
-		else
-			rowType = Drawer.RowType.Even;
-
-		int pos = 0;
-
-		while (true) {
-
-			if (pos >= p) { //don't draw until we reach p
-				drawer.DrawHighlight(backEvenGC, backPixmap, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, ht);
-				if (--n <= 0)
-					break;
-			}
-
-			rx = rx + drawer.Width;
-
-			pos++;
-		}
-	}
+                        pos++;
+                }
+        }
 
 	public override int CalcWidth(int n, bool force)
 	{

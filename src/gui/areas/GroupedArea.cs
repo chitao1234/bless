@@ -45,47 +45,39 @@ abstract public class GroupedArea : Area {
 
 	}
 
-	protected override void RenderRowNormal(int i, int p, int n, bool blank)
-	{
-		int rx = 0 + x;
-		int ry = i * drawer.Height + y;
-		long roffset = areaGroup.Offset + i * bpr + p;
-		bool odd;
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		Gdk.GC backOddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
+        protected override void RenderRowNormal(int i, int p, int n, bool blank)
+        {
+                int rx = x;
+                int ry = i * drawer.Height + y;
+                long roffset = areaGroup.Offset + i * bpr + p;
+                bool odd = (((roffset / bpr) % 2) == 1);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                Drawer.Color backOdd = drawer.GetBackgroundColor(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
 
-		// odd row?
-		odd = (((roffset / bpr) % 2) == 1);
+                if (blank) {
+                        if (odd)
+                                FillRectangle(backOdd, rx, ry, width, drawer.Height);
+                        else
+                                FillRectangle(backEven, rx, ry, width, drawer.Height);
+                }
 
-		if (blank == true) {
-			if (odd)
-				backPixmap.DrawRectangle(backOddGC, true, rx, ry, width, drawer.Height);
-			else
-				backPixmap.DrawRectangle(backEvenGC, true, rx, ry, width, drawer.Height);
-		}
+                Drawer.ColumnType colType;
+                Drawer.RowType rowType = odd ? Drawer.RowType.Odd : Drawer.RowType.Even;
 
-		Drawer.ColumnType colType;
-		Drawer.RowType rowType;
+                int pos = 0;
+                // draw bytes
+                while (true) {
 
-		if (odd)
-			rowType = Drawer.RowType.Odd;
-		else
-			rowType = Drawer.RowType.Even;
+                        if (pos >= p) { //don't draw until we reach p
+                                if ((pos / grouping) % 2 == 0)
+                                        colType = Drawer.ColumnType.Even;
+                                else
+                                        colType = Drawer.ColumnType.Odd;
 
-		int pos = 0;
-		// draw bytes
-		while (true) {
-
-			if (pos >= p) { //don't draw until we reach p
-				if ((pos / grouping) % 2 == 0)
-					colType = Drawer.ColumnType.Even;
-				else
-					colType = Drawer.ColumnType.Odd;
-
-				drawer.DrawNormal(backEvenGC, backPixmap, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, colType);
-				if (--n <= 0)
-					break;
-			}
+                                drawer.DrawNormal(renderContext, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, colType);
+                                if (--n <= 0)
+                                        break;
+                        }
 
 			// space if necessary
 			if (pos % grouping == grouping - 1)
@@ -97,41 +89,33 @@ abstract public class GroupedArea : Area {
 		}
 	}
 
-	protected override void RenderRowHighlight(int i, int p, int n, bool blank, Drawer.HighlightType ht)
-	{
-		int rx = 0 + x;
-		int ry = i * drawer.Height + y;
-		long roffset = areaGroup.Offset + i * bpr + p;
-		bool odd;
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		Gdk.GC backOddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
+        protected override void RenderRowHighlight(int i, int p, int n, bool blank, Drawer.HighlightType ht)
+        {
+                int rx = x;
+                int ry = i * drawer.Height + y;
+                long roffset = areaGroup.Offset + i * bpr + p;
+                bool odd = (((roffset / bpr) % 2) == 1);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                Drawer.Color backOdd = drawer.GetBackgroundColor(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
 
-		// odd row?
-		odd = (((roffset / bpr) % 2) == 1);
+                if (blank) {
+                        if (odd)
+                                FillRectangle(backOdd, rx, ry, width, drawer.Height);
+                        else
+                                FillRectangle(backEven, rx, ry, width, drawer.Height);
+                }
 
-		if (blank == true) {
-			if (odd)
-				backPixmap.DrawRectangle(backOddGC, true, rx, ry, width, drawer.Height);
-			else
-				backPixmap.DrawRectangle(backEvenGC, true, rx, ry, width, drawer.Height);
-		}
+                Drawer.RowType rowType = odd ? Drawer.RowType.Odd : Drawer.RowType.Even;
 
-		Drawer.RowType rowType;
+                int pos = 0;
+                // draw bytes
+                while (true) {
 
-		if (odd)
-			rowType = Drawer.RowType.Odd;
-		else
-			rowType = Drawer.RowType.Even;
-
-		int pos = 0;
-		// draw bytes
-		while (true) {
-
-			if (pos >= p) { //don't draw until we reach p
-				drawer.DrawHighlight(backEvenGC, backPixmap, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, ht);
-				if (--n <= 0)
-					break;
-			}
+                        if (pos >= p) { //don't draw until we reach p
+                                drawer.DrawHighlight(renderContext, rx, ry, areaGroup.GetCachedByte(roffset++), rowType, ht);
+                                if (--n <= 0)
+                                        break;
+                        }
 
 			// space if necessary
 			if (pos % grouping == grouping - 1)

@@ -283,35 +283,6 @@ public class StatisticsDrawWidget: Gtk.DrawingArea
 		gr.Stroke();
 	}
 
-	void UpdateHighlight()
-	{
-		Gdk.Window win = this.GdkWindow;
-
-		Cairo.Context g = Gdk.CairoHelper.Create(win);
-
-		int x, y, w, h, d;
-		win.GetGeometry(out x, out y, out w, out h, out d);
-
-		g.Scale (w, h);
-		g.LineWidth = (1.0 / freqs.Length) * 0.6;
-
-		if (previousHighlight != -1) {
-			/*int start=previousHighlight-1;
-			int end=previousHighlight+1;
-			if (start<0) start=0;
-			if (end>=barStart.Length) end=barStart.Length-1;*/
-			g.Color = new Color(0.0, 0.0, 0.0);
-			//for(int i=start; i<=end; i++)
-			DrawBar(g, previousHighlight);
-		}
-
-		if (currentHighlight != -1) {
-			g.Color = new Color(1.0, 0.0, 0.0);
-			DrawBar(g, currentHighlight);
-		}
-
-	}
-
 	void Draw (Cairo.Context gr, int width, int height)
 	{
 		gr.Scale (width, height);
@@ -347,20 +318,16 @@ public class StatisticsDrawWidget: Gtk.DrawingArea
 		currentHighlight = -1;
 	}
 
-	protected override bool OnExposeEvent (Gdk.EventExpose args)
-	{
-		Gdk.Window win = args.Window;
+        protected override bool OnDrawn (Cairo.Context cr)
+        {
+                int x, y, w, h, d;
+                this.GdkWindow.GetGeometry(out x, out y, out w, out h, out d);
+                this.HeightRequest = w / 5;
 
-		Cairo.Context g = Gdk.CairoHelper.Create(win);
+                Draw (cr, w, h);
 
-		int x, y, w, h, d;
-		win.GetGeometry(out x, out y, out w, out h, out d);
-		this.HeightRequest = w / 5;
-
-		Draw (g, w, h);
-
-		return true;
-	}
+                return true;
+        }
 
 	///<summary>Update all conversion entries</summary>
 	public void Update(int[] freqs)
@@ -419,10 +386,10 @@ public class StatisticsDrawWidget: Gtk.DrawingArea
 		currentHighlight = (int)((x / (freqWidth * alloc.Width))) + 1;
 		Console.WriteLine(currentHighlight);
 
-		if (previousHighlight != currentHighlight) {
-			UpdateHighlight();
-			previousHighlight = currentHighlight;
-		}
+                if (previousHighlight != currentHighlight) {
+                        previousHighlight = currentHighlight;
+                        QueueDraw();
+                }
 	}
 }
 

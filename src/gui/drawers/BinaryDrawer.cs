@@ -19,6 +19,10 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using Cairo;
+using Gdk;
+using Pango;
+
 namespace Bless.Gui.Drawers {
 
 ///<summary>Draws the binary representation of a byte</summary>
@@ -30,43 +34,48 @@ public class BinaryDrawer : Drawer {
 	}
 
 
-	protected override void Draw(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, Gdk.Pixmap pix)
-	{
-		// draw from the end backwards
-		x += 6 * width;
-		for (int i = 0; i < 4; i++) {
-			byte k = (byte)(b & 3);
-			dest.DrawDrawable(gc, pix, k*2*width, 0, x, y, 2*width, height);
-			x -= 2 * width;
-			b = (byte)(b >> 2);
-		}
-	}
+        protected override void Draw(Cairo.Context cr, int x, int y, byte b, ImageSurface surface)
+        {
+                if (surface == null)
+                        return;
 
-	protected override Gdk.Pixmap Create(Gdk.Color fg, Gdk.Color bg)
-	{
-		Gdk.Window win = widget.GdkWindow;
+                // draw from the end backwards
+                x += 6 * width;
+                for (int i = 0; i < 4; i++) {
+                        byte k = (byte)(b & 3);
+                        cr.Save();
+                        cr.Rectangle(x, y, 2*width, height);
+                        cr.SetSourceSurface(surface, x - k*2*width, y);
+                        cr.Fill();
+                        cr.Restore();
+                        x -= 2 * width;
+                        b = (byte)(b >> 2);
+                }
+        }
 
-		Gdk.GC gc = new Gdk.GC(win);
-		Gdk.Pixmap pix = new Gdk.Pixmap(win, 4*2*width, height, -1);
+        protected override ImageSurface Create(Gdk.Color fg, Gdk.Color bg)
+        {
+                int surfaceWidth = 4*2*width;
+                ImageSurface surface = new ImageSurface(Format.Argb32, surfaceWidth, height);
 
-		// draw the background
-		gc.RgbFgColor = bg;
-		pix.DrawRectangle(gc, true, 0, 0, 4*2*width, height);
+                using (Cairo.Context cr = new Cairo.Context(surface)) {
+                        Gdk.CairoHelper.SetSourceColor(cr, bg);
+                        cr.Rectangle(0, 0, surfaceWidth, height);
+                        cr.Fill();
 
-		// render the bytes
-		string s = "00011011";
+                        string s = "00011011";
 
+                        pangoLayout.SetText(s);
 
-		//Console.WriteLine(s);
+                        Gdk.CairoHelper.SetSourceColor(cr, fg);
+                        Pango.CairoHelper.UpdateLayout(cr, pangoLayout);
+                        cr.MoveTo(0, 0);
+                        Pango.CairoHelper.ShowLayout(cr, pangoLayout);
+                }
 
-		pangoLayout.SetText(s);
-
-
-		gc.RgbFgColor = fg;
-		pix.DrawLayout(gc, 0, 0, pangoLayout);
-
-		return pix;
-	}
+                surface.Flush();
+                return surface;
+        }
 
 }
 
