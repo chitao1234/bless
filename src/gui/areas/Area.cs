@@ -23,6 +23,8 @@ using Bless.Gui.Drawers;
 using Bless.Util;
 using Bless.Buffers;
 using Bless.Tools.Find;
+using Cairo;
+using Gdk;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -41,24 +43,24 @@ public abstract class Area
 	// display
 	protected int x;
 	protected int y;
-	protected int width;
-	protected int height;
-	protected int bpr;
-	protected int dpb; // digits per byte
-	protected int fixedBpr;
-	protected Gdk.Drawable backPixmap;
-	protected bool manualDoubleBuffer;
-	protected bool isAreaRealized;
+        protected int width;
+        protected int height;
+        protected int bpr;
+        protected int dpb; // digits per byte
+        protected int fixedBpr;
+        protected bool isAreaRealized;
 
-	// GC's
-	protected Gdk.GC cursorGC;
-	protected Gdk.GC activeCursorGC;
-	protected Gdk.GC inactiveCursorGC;
+        protected Gdk.Color cursorColor;
+        protected Gdk.Color activeCursorColor;
+        protected Gdk.Color inactiveCursorColor;
+
+        protected Cairo.Context renderContext;
 
 	
 	protected int cursorDigit;
-	protected bool cursorFocus;
-	protected bool canFocus;
+        protected bool cursorFocus;
+        protected bool isActive;
+        protected bool canFocus;
 	
 	public enum RenderMergeFlags {None = 0, Left = 1, Right = 2}
 	// Abstract methods
@@ -316,42 +318,82 @@ public abstract class Area
 		XmlNodeList childNodes = parentNode.ChildNodes;
 		foreach(XmlNode node in childNodes) {
 			Gdk.Color col = new Gdk.Color();
-			if (node.Name == "foreground") {
-				Gdk.Color.Parse(node.InnerText, ref col);
-				Gdk.Colormap.System.AllocColor(ref col, false, true);
-				fg = new Drawer.Color(col);
-			}
-			if (node.Name == "background") {
-				Gdk.Color.Parse(node.InnerText, ref col);
-				Gdk.Colormap.System.AllocColor(ref col, false, true);
-				bg = new Drawer.Color(col);
-			}
+                        if (node.Name == "foreground") {
+                                Gdk.Color.Parse(node.InnerText, ref col);
+                                fg = new Drawer.Color(col);
+                        }
+                        if (node.Name == "background") {
+                                Gdk.Color.Parse(node.InnerText, ref col);
+                                bg = new Drawer.Color(col);
+                        }
 		}
 	}
 
 	///<summary>
 	/// Realize the area.
 	///</summary>
-	public virtual void Realize()
-	{
-		Gtk.DrawingArea da = areaGroup.DrawingArea;
+        public virtual void Realize()
+        {
+                Gtk.DrawingArea da = areaGroup.DrawingArea;
 
-		backPixmap = da.GdkWindow;
+                Gdk.Color col = new Gdk.Color();
 
-		activeCursorGC = new Gdk.GC(da.GdkWindow);
-		inactiveCursorGC = new Gdk.GC(da.GdkWindow);
+                Gdk.Color.Parse("red", ref col);
+                activeCursorColor = col;
+                Gdk.Color.Parse("gray", ref col);
+                inactiveCursorColor = col;
+                cursorColor = activeCursorColor;
 
-		Gdk.Color col = new Gdk.Color();
+                isAreaRealized = true;
+        }
 
+        internal void SetRenderContext(Cairo.Context context)
+        {
+                renderContext = context;
+        }
 
-		Gdk.Color.Parse("red", ref col);
-		activeCursorGC.RgbFgColor = col;
-		Gdk.Color.Parse("gray", ref col);
-		inactiveCursorGC.RgbFgColor = col;
-		cursorGC = activeCursorGC;
+        internal void ClearRenderContext()
+        {
+                renderContext = null;
+        }
 
-		isAreaRealized = true;
-	}
+        protected void FillRectangle(Drawer.Color color, int rx, int ry, int w, int h)
+        {
+                if (renderContext == null || color == null)
+                        return;
+
+                renderContext.Save();
+                Gdk.CairoHelper.SetSourceColor(renderContext, color.GdkColor);
+                renderContext.Rectangle(rx, ry, w, h);
+                renderContext.Fill();
+                renderContext.Restore();
+        }
+
+        protected void FillRectangle(Gdk.Color color, int rx, int ry, int w, int h)
+        {
+                if (renderContext == null)
+                        return;
+
+                renderContext.Save();
+                Gdk.CairoHelper.SetSourceColor(renderContext, color);
+                renderContext.Rectangle(rx, ry, w, h);
+                renderContext.Fill();
+                renderContext.Restore();
+        }
+
+        protected void DrawLine(Gdk.Color color, int x1, int y1, int x2, int y2)
+        {
+                if (renderContext == null)
+                        return;
+
+                renderContext.Save();
+                Gdk.CairoHelper.SetSourceColor(renderContext, color);
+                renderContext.LineWidth = 1.0;
+                renderContext.MoveTo(x1 + 0.5, y1 + 0.5);
+                renderContext.LineTo(x2 + 0.5, y2 + 0.5);
+                renderContext.Stroke();
+                renderContext.Restore();
+        }
 
 	// Properties
 	//
@@ -394,10 +436,13 @@ public abstract class Area
 		set { if (value >= dpb) cursorDigit = dpb - 1; else cursorDigit = value; }
 	}
 	
-	public bool HasCursorFocus {
-		set { cursorFocus = value; }
-		get { return cursorFocus;}
-	}
+        public bool HasCursorFocus {
+                set {
+                        cursorFocus = value;
+                        cursorColor = cursorFocus ? activeCursorColor : inactiveCursorColor;
+                }
+                get { return cursorFocus;}
+        }
 
 	public bool CanFocus {
 		get { return canFocus;}
@@ -417,20 +462,17 @@ public abstract class Area
 		get { return type; }
 	}
 
-	public bool IsActive {
-		set {
-			if (value == true)
-				cursorGC = activeCursorGC;
-			else
-				cursorGC = inactiveCursorGC;
+        public bool IsActive {
+                set {
+                        isActive = value;
+                        cursorColor = isActive ? activeCursorColor : inactiveCursorColor;
+                        // doesn't actually change cursor position
+                        // just redraws it with correct color
+                        //MoveCursor(cursorOffset, cursorDigit);
+                }
 
-			// doesn't actually change cursor position
-			// just redraws it with correct color
-			//MoveCursor(cursorOffset, cursorDigit);
-		}
-
-		get { return cursorGC == activeCursorGC; }
-	}
+                get { return isActive; }
+        }
 
 	/// <summary>
 	/// This method is only called to draw extra stuff when doing a complete
@@ -465,163 +507,92 @@ public abstract class Area
 	/// a similar adjacent highlight). It just draws the highlight in such a way as 
 	/// to appear merged to any similar highlights if they exist.
 	///</remarks>
-	internal protected virtual void RenderHighlight(Highlight h, Drawer.HighlightType left, Drawer.HighlightType right)
-	{
-		if (isAreaRealized == false)
-			return;
-		
-		int rstart, bstart, xstart, ystart;
-		int rend, bend, xend, yend;
-		bool odd;
-		Gdk.GC gc;
-		Gdk.GC oddGC;
-		Gdk.GC evenGC;
-		Gdk.GC leftGC;
-		Gdk.GC rightGC;
-		
-		oddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, h.Type);
-		evenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, h.Type);
-		
+        internal protected virtual void RenderHighlight(Highlight h, Drawer.HighlightType left, Drawer.HighlightType right)
+        {
+                if (isAreaRealized == false)
+                        return;
 
-		GetDisplayInfoByOffset(h.Start, out rstart, out bstart, out xstart, out ystart);
-		GetDisplayInfoByOffset(h.End, out rend, out bend, out xend, out yend);
-		
-		//System.Console.WriteLine("Start {0:x} {1} {2} x:{3} y:{4}", h.Start, rstart, bstart, xstart, ystart);
-		//System.Console.WriteLine("End {0:x} {1} {2} x:{3} y:{4}", h.End, rend, bend, xend, yend);
-		bool drawLeft = false;
-		int dxstart = xstart;
-		
-		if (bstart > 0) {
-			int digit;
-			GetOffsetFlags gof;
-			GetOffsetByDisplayInfo(xstart - 1, ystart, out digit, out gof);
-			if ((gof & GetOffsetFlags.Abyss) != 0) {
-				dxstart -= drawer.Width;
-				drawLeft = true;
-			}
-		}
-		
-		bool drawRight = false;
-		int dxend = xend;
-		
-		if (bend < bpr - 1) {
-			int digit;
-			GetOffsetFlags gof;
-			GetOffsetByDisplayInfo(xend + dpb*drawer.Width, yend, out digit, out gof);
-			if ((gof & GetOffsetFlags.Abyss) != 0) {
-				dxend += drawer.Width;
-				drawRight = true;
-			}
-		}
-		
-		// if the whole range is on one row
-		if (rstart == rend) {
-			if (areaGroup.ManualDoubleBuffer) {
-				BeginPaint(x + dxstart, y + ystart, dxend - dxstart + dpb*drawer.Width, drawer.Height);
-			}
-			// odd row?
-			odd = (((h.Start / bpr) % 2) == 1);
-			if (odd) {
-				gc = oddGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, right);
-			}
-			else {
-				gc = evenGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Even, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Even, right);
-			}
-			
-			//render
-			if (drawLeft)
-				backPixmap.DrawRectangle(leftGC, true, x + dxstart, y + ystart, drawer.Width, drawer.Height);
-			if (drawRight)
-				backPixmap.DrawRectangle(rightGC, true, x + xend + dpb*drawer.Width, y + yend, drawer.Width, drawer.Height);
-			
-			backPixmap.DrawRectangle(gc, true, x + xstart, y + ystart, xend - xstart + dpb*drawer.Width, drawer.Height);
+                int rstart, bstart, xstart, ystart;
+                int rend, bend, xend, yend;
 
-			RenderRangeHelper(h.Type, rstart, bstart, bend - bstart + 1);
-		}
-		else { // multi-row range
+                Drawer.Color oddColor = drawer.GetBackgroundColor(Drawer.RowType.Odd, h.Type);
+                Drawer.Color evenColor = drawer.GetBackgroundColor(Drawer.RowType.Even, h.Type);
 
-			if (areaGroup.ManualDoubleBuffer) {
-				// handle double-buffering
-				Gdk.Region paintRegion = new Gdk.Region();
+                GetDisplayInfoByOffset(h.Start, out rstart, out bstart, out xstart, out ystart);
+                GetDisplayInfoByOffset(h.End, out rend, out bend, out xend, out yend);
 
-				Gdk.Rectangle rectStart = new Gdk.Rectangle(x + dxstart, y + ystart, width - dxstart, drawer.Height);
+                bool drawLeft = false;
+                int dxstart = xstart;
 
-				Gdk.Rectangle rectMiddle;
-				if (rend > rstart + 1)
-					rectMiddle = new Gdk.Rectangle(x, y + ystart + drawer.Height, width, yend - ystart - drawer.Height);
-				else
-					rectMiddle = Gdk.Rectangle.Zero;
+                if (bstart > 0) {
+                        int digit;
+                        GetOffsetFlags gof;
+                        GetOffsetByDisplayInfo(xstart - 1, ystart, out digit, out gof);
+                        if ((gof & GetOffsetFlags.Abyss) != 0) {
+                                dxstart -= drawer.Width;
+                                drawLeft = true;
+                        }
+                }
 
-				Gdk.Rectangle rectEnd = new Gdk.Rectangle(x, y + yend, dxend + dpb*drawer.Width, drawer.Height);
+                bool drawRight = false;
+                int dxend = xend;
 
-				paintRegion.UnionWithRect(rectStart);
-				paintRegion.UnionWithRect(rectMiddle);
-				paintRegion.UnionWithRect(rectEnd);
+                if (bend < bpr - 1) {
+                        int digit;
+                        GetOffsetFlags gof;
+                        GetOffsetByDisplayInfo(xend + dpb*drawer.Width, yend, out digit, out gof);
+                        if ((gof & GetOffsetFlags.Abyss) != 0) {
+                                dxend += drawer.Width;
+                                drawRight = true;
+                        }
+                }
 
-				BeginPaintRegion(paintRegion);
-			}
+                if (rstart == rend) {
+                        bool odd = (((h.Start / bpr) % 2) == 1);
+                        Drawer.Color baseColor = odd ? oddColor : evenColor;
+                        Drawer.Color leftColor = drawer.GetBackgroundColor(odd ? Drawer.RowType.Odd : Drawer.RowType.Even, left);
+                        Drawer.Color rightColor = drawer.GetBackgroundColor(odd ? Drawer.RowType.Odd : Drawer.RowType.Even, right);
 
-			// render first row
-			odd = (((h.Start / bpr) % 2) == 1);
-			if (odd) {
-				gc = oddGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, right);
-			}
-			else {
-				gc = evenGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Even, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Even, right);
-			}
-			
-			if (drawLeft)
-				backPixmap.DrawRectangle(leftGC, true, x + dxstart, y + ystart, drawer.Width, drawer.Height);
-			backPixmap.DrawRectangle(gc, true, x + xstart, y + ystart, width - xstart, drawer.Height);
+                        if (drawLeft)
+                                FillRectangle(leftColor, x + dxstart, y + ystart, drawer.Width, drawer.Height);
+                        if (drawRight)
+                                FillRectangle(rightColor, x + xend + dpb*drawer.Width, y + yend, drawer.Width, drawer.Height);
 
-			RenderRangeHelper(h.Type, rstart, bstart, bpr - bstart);
+                        FillRectangle(baseColor, x + xstart, y + ystart, xend - xstart + dpb*drawer.Width, drawer.Height);
 
-			long curOffset = h.Start + bpr - bstart;
+                        RenderRangeHelper(h.Type, rstart, bstart, bend - bstart + 1);
+                }
+                else {
+                        bool odd = (((h.Start / bpr) % 2) == 1);
+                        Drawer.Color baseColor = odd ? oddColor : evenColor;
+                        Drawer.Color leftColor = drawer.GetBackgroundColor(odd ? Drawer.RowType.Odd : Drawer.RowType.Even, left);
 
-			// render middle rows
-			for (int i = rstart + 1;i < rend;i++) {
-				odd = (((curOffset / bpr) % 2) == 1);
-				if (odd)
-					gc = oddGC;
-				else
-					gc = evenGC;
-				backPixmap.DrawRectangle(gc, true, x, y + i*drawer.Height, width, drawer.Height);
-				RenderRangeHelper(h.Type, i, 0, bpr);
-				curOffset += bpr;
-			}
+                        if (drawLeft)
+                                FillRectangle(leftColor, x + dxstart, y + ystart, drawer.Width, drawer.Height);
+                        FillRectangle(baseColor, x + xstart, y + ystart, width - xstart, drawer.Height);
 
-			// render last row
-			odd = (((h.End / bpr) % 2) == 1);
-			if (odd) {
-				gc = oddGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, right);
-			}
-			else {
-				gc = evenGC;
-				leftGC = drawer.GetBackgroundGC(Drawer.RowType.Even, left);
-				rightGC = drawer.GetBackgroundGC(Drawer.RowType.Even, right);
-			}
-			
-			if (drawRight)
-				backPixmap.DrawRectangle(rightGC, true, x + xend + dpb*drawer.Width, y + yend, drawer.Width, drawer.Height);
-			backPixmap.DrawRectangle(gc, true, x, y + yend, xend + dpb*drawer.Width, drawer.Height);
-			RenderRangeHelper(h.Type, rend, 0, bend + 1);
-		}
+                        RenderRangeHelper(h.Type, rstart, bstart, bpr - bstart);
 
-		if (areaGroup.ManualDoubleBuffer) {
-			EndPaint();
-		}
+                        long curOffset = h.Start + bpr - bstart;
 
-	}
+                        for (int i = rstart + 1; i < rend; i++) {
+                                odd = (((curOffset / bpr) % 2) == 1);
+                                baseColor = odd ? oddColor : evenColor;
+                                FillRectangle(baseColor, x, y + i*drawer.Height, width, drawer.Height);
+                                RenderRangeHelper(h.Type, i, 0, bpr);
+                                curOffset += bpr;
+                        }
+
+                        odd = (((h.End / bpr) % 2) == 1);
+                        baseColor = odd ? oddColor : evenColor;
+                        Drawer.Color rightColor = drawer.GetBackgroundColor(odd ? Drawer.RowType.Odd : Drawer.RowType.Even, right);
+
+                        if (drawRight)
+                                FillRectangle(rightColor, x + xend + dpb*drawer.Width, y + yend, drawer.Width, drawer.Height);
+                        FillRectangle(baseColor, x, y + yend, xend + dpb*drawer.Width, drawer.Height);
+                        RenderRangeHelper(h.Type, rend, 0, bend + 1);
+                }
+        }
 	
 	/// <summary>
 	/// Blanks the selected offset
@@ -629,88 +600,63 @@ public abstract class Area
 	/// <param name="offs">
 	/// A <see cref="System.Int64"/>
 	/// </param>
-	internal protected void BlankOffset(long offs)
-	{
-		if (isAreaRealized == false) 
-			return; 
+        internal protected void BlankOffset(long offs)
+        {
+                if (isAreaRealized == false)
+                        return;
 
-		int nrows = height / drawer.Height; 
-		long bytesInView = nrows * bpr; 
+                int nrows = height / drawer.Height;
+                long bytesInView = nrows * bpr;
 
-		if (offs >= areaGroup.Offset && offs < areaGroup.Offset + bytesInView) {
-			int pcRow, pcByte, pcX, pcY; 
-			GetDisplayInfoByOffset(offs, out pcRow, out pcByte, out pcX, out pcY); 
-			Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal); 
-			backPixmap.DrawRectangle(backEvenGC, true, x + pcX, y + pcY, drawer.Width*dpb, drawer.Height); 
-		} 
-	
-	}
-	
-	///<summary>Render the cursor</summary>
-	internal protected void RenderCursor()
-	{
-		if (isAreaRealized == false)
-			return;
+                if (offs >= areaGroup.Offset && offs < areaGroup.Offset + bytesInView) {
+                        int pcRow, pcByte, pcX, pcY;
+                        GetDisplayInfoByOffset(offs, out pcRow, out pcByte, out pcX, out pcY);
+                        Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                        FillRectangle(backEven, x + pcX, y + pcY, drawer.Width*dpb, drawer.Height);
+                }
 
-		int cRow, cByte, cX, cY;
-		GetDisplayInfoByOffset(areaGroup.CursorOffset, out cRow, out cByte, out cX, out cY);
+        }
 
-		backPixmap.DrawRectangle(cursorGC, true, x + cX, y + cY + drawer.Height - 2, drawer.Width*dpb, 2);
-		if (cursorFocus) {
-			backPixmap.DrawRectangle(cursorGC, true, x + cX + cursorDigit*drawer.Width, y + cY, 1, drawer.Height - 2);
-		}
-	}
+        ///<summary>Render the cursor</summary>
+        internal protected void RenderCursor()
+        {
+                if (isAreaRealized == false)
+                        return;
+
+                int cRow, cByte, cX, cY;
+                GetDisplayInfoByOffset(areaGroup.CursorOffset, out cRow, out cByte, out cX, out cY);
+
+                FillRectangle(cursorColor, x + cX, y + cY + drawer.Height - 2, drawer.Width*dpb, 2);
+                if (cursorFocus) {
+                        FillRectangle(cursorColor, x + cX + cursorDigit*drawer.Width, y + cY, 1, drawer.Height - 2);
+                }
+        }
 	
 	/// <summary>
 	/// Dispose the (server side) pixmaps used by this area.
 	/// </summary>
-	public void DisposePixmaps()
-	{
-		if (isAreaRealized == false)
-			return;
+        public void DisposePixmaps()
+        {
+                if (isAreaRealized == false)
+                        return;
 
-		backPixmap.Dispose();
-		drawer.DisposePixmaps();
-	}
+                drawer.DisposePixmaps();
+        }
 
 	
-	void BeginPaintRegion(Gdk.Region r)
-	{
-		Gdk.Window win = areaGroup.DrawingArea.GdkWindow;
+        internal virtual void BlankBackground()
+        {
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                FillRectangle(backEven, x, y, width, height);
+        }
 
-		win.BeginPaintRegion(r);
-	}
-
-	void BeginPaint()
-	{
-		BeginPaint(this.x, this.y, this.width, this.height);
-	}
-
-	void BeginPaint(int x, int y, int w, int h)
-	{
-		Gdk.Window win = areaGroup.DrawingArea.GdkWindow;
-
-		win.BeginPaintRect(new Gdk.Rectangle(x, y, w, h));
-	}
-
-	void EndPaint()
-	{
-		areaGroup.DrawingArea.GdkWindow.EndPaint();
-	}
-
-	internal virtual void BlankBackground()
-	{
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		backPixmap.DrawRectangle(backEvenGC, true, x, y, width, height);
-	}
-	
-	internal virtual void BlankEof()
-	{
-		int pcRow, pcByte, pcX, pcY;
-		GetDisplayInfoByOffset(areaGroup.Buffer.Size, out pcRow, out pcByte, out pcX, out pcY);
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		backPixmap.DrawRectangle(backEvenGC, true, x + pcX, y + pcY, drawer.Width*dpb, drawer.Height);
-	}
+        internal virtual void BlankEof()
+        {
+                int pcRow, pcByte, pcX, pcY;
+                GetDisplayInfoByOffset(areaGroup.Buffer.Size, out pcRow, out pcByte, out pcX, out pcY);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                FillRectangle(backEven, x + pcX, y + pcY, drawer.Width*dpb, drawer.Height);
+        }
 	
 	public virtual void ShowPopup(Gtk.UIManager uim)
 	{

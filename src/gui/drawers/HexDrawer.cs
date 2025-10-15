@@ -18,6 +18,10 @@
  *   along with Bless; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+using Cairo;
+using Gdk;
+using Pango;
+
 namespace Bless.Gui.Drawers {
 
 ///<summary>Draws the hex representation of a byte</summary>
@@ -32,48 +36,52 @@ public class HexDrawer : Drawer {
 	{
 	}
 
-	protected override void Draw(Gdk.GC gc, Gdk.Drawable dest, int x, int y, byte b, Gdk.Pixmap pix)
-	{
-		dest.DrawDrawable(gc, pix, b*2*width, 0, x, y, 2*width, height);
-	}
+        protected override void Draw(Cairo.Context cr, int x, int y, byte b, ImageSurface surface)
+        {
+                if (surface == null)
+                        return;
 
-	protected override Gdk.Pixmap Create(Gdk.Color fg, Gdk.Color bg)
-	{
-		Gdk.Window win = widget.GdkWindow;
+                cr.Save();
+                cr.Rectangle(x, y, 2*width, height);
+                cr.SetSourceSurface(surface, x - b*2*width, y);
+                cr.Fill();
+                cr.Restore();
+        }
 
-		Gdk.GC gc = new Gdk.GC(win);
-		Gdk.Pixmap pix = new Gdk.Pixmap(win, 256*2*width, height, -1);
+        protected override ImageSurface Create(Gdk.Color fg, Gdk.Color bg)
+        {
+                int surfaceWidth = 256*2*width;
+                ImageSurface surface = new ImageSurface(Format.Argb32, surfaceWidth, height);
 
-		// draw the background
-		gc.RgbFgColor = bg;
-		pix.DrawRectangle(gc, true, 0, 0, 256*2*width, height);
+                using (Cairo.Context cr = new Cairo.Context(surface)) {
+                        Gdk.CairoHelper.SetSourceColor(cr, bg);
+                        cr.Rectangle(0, 0, surfaceWidth, height);
+                        cr.Fill();
 
-		// render the bytes
-		string s;
+                        string s = info.Uppercase ? HexTableUpper : HexTableLower;
 
-		if (info.Uppercase == false)
-			s = HexDrawer.HexTableLower;
-		else
-			s = HexDrawer.HexTableUpper;
+                        Gdk.CairoHelper.SetSourceColor(cr, fg);
 
-		//System.Console.WriteLine(s);
+                        // Render the text in two parts (256 printable characters each).  We do
+                        // this to work around a bug in some drivers that fail to render text
+                        // that ends up wider than 4096 pixels.
+                        pangoLayout.SetText(s.Substring(0,256));
+                        Pango.CairoHelper.UpdateLayout(cr, pangoLayout);
+                        cr.MoveTo(0, 0);
+                        Pango.CairoHelper.ShowLayout(cr, pangoLayout);
 
-		gc.RgbFgColor = fg;
+                        // The second part also contains the two Zero Width Non-Joiner
+                        // characters, so it's actually 258 string characters, although still
+                        // 256 printable characters.
+                        pangoLayout.SetText(s.Substring(256));
+                        Pango.CairoHelper.UpdateLayout(cr, pangoLayout);
+                        cr.MoveTo(128*2*width, 0);
+                        Pango.CairoHelper.ShowLayout(cr, pangoLayout);
+                }
 
-		// Render the text in two parts (256 printable characters each).  We do
-		// this to work around a bug in some drivers that fail to render text
-		// that ends up wider than 4096 pixels.
-		pangoLayout.SetText(s.Substring(0,256));
-		pix.DrawLayout(gc, 0, 0, pangoLayout);
-		
-		// The second part also contains the two Zero Width Non-Joiner
-		// characters, so it's actually 258 string characters, although still
-		// 256 printable characters.
-		pangoLayout.SetText(s.Substring(256));
-		pix.DrawLayout(gc, 128*2*width, 0, pangoLayout);
-
-		return pix;
-	}
+                surface.Flush();
+                return surface;
+        }
 
 
 

@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using Bless.Buffers;
 using Bless.Util;
 using Bless.Gui.Drawers;
+using Cairo;
 
 namespace Bless.Gui.Areas
 {
@@ -126,8 +127,7 @@ public class AreaGroup
 	
 	enum Changes { Offset = 1, Cursor = 2, Highlights = 4}
 	
-	Changes changes;
-	bool manualDoubleBuffer;
+        Changes changes;
 	
 	// current offset of view in the buffer
 	long offset; 
@@ -200,36 +200,47 @@ public class AreaGroup
 	
 	public Util.Range Selection {
 		get { return selection; }
-		set { 
-			if (selection == value)
+		set {
+			Util.Range newValue = value ?? new Util.Range();
+
+			if (selection.Start == newValue.Start && selection.End == newValue.End)
 				return;
+
+			Highlight previousSelection = new Highlight(selection);
+
 			highlights.Delete(selection);
-			selection.Start = value.Start; selection.End = value.End;
-			
-			// make sure the cursor is also updated (because it may 
-			// not have changed position so SetCursor() won't render it 
+			selection.Start = newValue.Start;
+			selection.End = newValue.End;
+
+			QueueHighlightRange(previousSelection);
+			QueueHighlightRange(selection);
+			QueueCursorRegion(cursorOffset);
+
+			// make sure the cursor is also updated (because it may
+			// not have changed position so SetCursor() won't render it
 			// but it may have to become visible again eg when a selection is cleared)
-			SetChanged(Changes.Highlights | Changes.Cursor);
+			SetChanged(Changes.Highlights | Changes.Cursor, false);
 		}
-	}
-	
-	internal bool ManualDoubleBuffer {
-		get { return manualDoubleBuffer; }
 	}
 	
 	public void SetCursor(long coffset, int cdigit)
 	{
 		prevCursorOffset = cursorOffset;
-		
+
 		// if there is no change ignore...
 		if (cursorOffset == coffset && this.CursorDigit == cdigit)
 			return;
-		
+
+		long previousOffset = cursorOffset;
+		QueueCursorRegion(previousOffset);
+
 		cursorOffset = coffset;
 		foreach(Area a in areas)
 			a.CursorDigit = cdigit;
-		
-		SetChanged(Changes.Cursor);
+
+		QueueCursorRegion(cursorOffset);
+
+		SetChanged(Changes.Cursor, false);
 	}
 	
 	public byte GetCachedByte(long pos)
@@ -307,37 +318,136 @@ public class AreaGroup
 	/// A <see cref="Changes"/>
 	/// </param>
 	///<remarks>This causes the group to be rendered again.</remarks>
-	private void SetChanged(Changes c)
-	{
-		changes |= c;
-		
-			
-		Gtk.Application.Invoke(delegate {
-			if (drawingArea == null || drawingArea.GdkWindow == null)
-				return;
+        private void SetChanged(Changes c, bool queueFullInvalidation = true)
+        {
+                changes |= c;
 
-			if (HasChanged(Changes.Offset)) {
-				Gdk.Rectangle view = drawingArea.Allocation;
-				view.X = 0;
-				view.Y = 0;
-				drawingArea.GdkWindow.BeginPaintRect(view);
-				Render(false);
-				drawingArea.GdkWindow.EndPaint();
-			}
-			else 
-				ExposeManually();
-		});
-	}
-	
-	/// <summary>
-	/// Render this group, manually handling the double buffering
-	/// </summary>
-	private void ExposeManually()
-	{
-		manualDoubleBuffer = true;
-		Render(false);
-		manualDoubleBuffer = false;
-	}
+                if (!queueFullInvalidation)
+                        return;
+
+                Gtk.Application.Invoke(delegate {
+                        if (drawingArea == null)
+                                return;
+
+                        Gdk.Rectangle alloc = drawingArea.Allocation;
+                        drawingArea.QueueDrawArea(0, 0, alloc.Width, alloc.Height);
+                });
+        }
+
+        private void QueueCursorRegion(long offs)
+        {
+                if (drawingArea == null || offs < 0)
+                        return;
+
+                foreach (Area area in areas)
+                        QueueCursorRegion(area, offs);
+        }
+
+        private void QueueCursorRegion(Area area, long offs)
+        {
+                Drawer drawer = area.Drawer;
+
+                if (drawer == null || drawer.Height <= 0 || drawer.Width <= 0)
+                        return;
+
+                int nrows = area.Height / drawer.Height;
+                if (nrows <= 0)
+                        return;
+
+                long bytesInView = (long)nrows * area.BytesPerRow;
+                if (offs < offset || offs >= offset + bytesInView)
+                        return;
+
+                int row, b, ox, oy;
+                area.GetDisplayInfoByOffset(offs, out row, out b, out ox, out oy);
+
+                if (row < 0 || row >= nrows)
+                        return;
+
+                int width = drawer.Width * area.DigitsPerByte;
+                int height = drawer.Height;
+
+                if (width <= 0 || height <= 0)
+                        return;
+
+                int x = area.X + ox;
+                int y = area.Y + oy;
+
+                QueueRectangle(x, y, width, height);
+        }
+
+        private void QueueHighlightRange(Util.IRange range)
+        {
+                if (drawingArea == null || range == null || range.IsEmpty())
+                        return;
+
+                long startRange = range.Start;
+                long endRange = range.End;
+
+                if (startRange > endRange) {
+                        long tmp = startRange;
+                        startRange = endRange;
+                        endRange = tmp;
+                }
+
+                foreach (Area area in areas)
+                        QueueHighlightRange(area, startRange, endRange);
+        }
+
+        private void QueueHighlightRange(Area area, long start, long end)
+        {
+                Drawer drawer = area.Drawer;
+
+                if (drawer == null || drawer.Height <= 0)
+                        return;
+
+                int nrows = area.Height / drawer.Height;
+                if (nrows <= 0)
+                        return;
+
+                long viewStart = offset;
+                long viewEnd = viewStart + (long)nrows * area.BytesPerRow - 1;
+
+                if (start > viewEnd || end < viewStart)
+                        return;
+
+                long clippedStart = System.Math.Max(start, viewStart);
+                long clippedEnd = System.Math.Min(end, viewEnd);
+
+                if (clippedStart > clippedEnd)
+                        return;
+
+                int firstRow = (int)((clippedStart - viewStart) / area.BytesPerRow);
+                int lastRow = (int)((clippedEnd - viewStart) / area.BytesPerRow);
+
+                int width = area.Width;
+                int height = drawer.Height;
+
+                if (width <= 0 || height <= 0)
+                        return;
+
+                for (int row = firstRow; row <= lastRow; row++) {
+                        if (row < 0 || row >= nrows)
+                                continue;
+
+                        int x = area.X;
+                        int y = area.Y + row * height;
+                        QueueRectangle(x, y, width, height);
+                }
+        }
+
+        private void QueueRectangle(int x, int y, int width, int height)
+        {
+                if (width <= 0 || height <= 0)
+                        return;
+
+                Gtk.Application.Invoke(delegate {
+                        if (drawingArea == null)
+                                return;
+
+                        drawingArea.QueueDrawArea(x, y, width, height);
+                });
+        }
 	
 	/// <summary>
 	/// Invalidate this group (visually). This forces a complete redraw
@@ -369,8 +479,12 @@ public class AreaGroup
 	/// </summary>
 	public void AddHighlight(long start, long end, Drawer.HighlightType ht)
 	{
-		highlights.Insert(new Highlight(start, end, ht));
-		changes |= Changes.Highlights;
+		Highlight highlight = new Highlight(start, end, ht);
+		highlights.Insert(highlight);
+
+		QueueHighlightRange(highlight);
+
+		SetChanged(Changes.Highlights, false);
 	}
 	
 	private void ClearHighlights()
@@ -419,19 +533,21 @@ public class AreaGroup
 	private void UpdateFocusedArea(Area fa)
 	{
 		focusedArea = fa;
-		
+
 		foreach(Area a in areas)
 			a.HasCursorFocus = false;
-		
+
 		focusedArea.HasCursorFocus = true;
-		
+
 		// set the previous cursor so that when
 		// the screen is rendered the byte under the
 		// cursor is properly cleared (before being drawn
 		// again)
 		prevCursorOffset = cursorOffset;
-		
-		SetChanged(Changes.Cursor);
+
+		QueueCursorRegion(cursorOffset);
+
+		SetChanged(Changes.Cursor, false);
 	}
 	
 	/// <summary>
@@ -656,16 +772,20 @@ public class AreaGroup
 	/// as possible by drawing only the parts of the screen that
 	/// have changed (eg when changing the selection)
 	/// </remarks>
-	public void Render(bool force)
-	{
-		// sanity check
-		if (byteBuffer == null)
-			return;
-		
-		InitializeHighlights();
-		
-		if (PreRenderEvent != null)
-			PreRenderEvent(this);
+        public void Render(Cairo.Context cr, bool force)
+        {
+                // sanity check
+                if (byteBuffer == null)
+                        return;
+
+                foreach (Area a in areas)
+                        a.SetRenderContext(cr);
+
+                try {
+                InitializeHighlights();
+
+                if (PreRenderEvent != null)
+                        PreRenderEvent(this);
 		
 		/* This breaks the RenderExtra() optimizations in OffsetArea and SeparatorArea
 		
@@ -705,10 +825,15 @@ public class AreaGroup
 		}
 		
 		// update prevAtomicHighlights
-		prevAtomicHighlights = atomicHighlights;
-		
-		ClearChanges();
-	}
+                prevAtomicHighlights = atomicHighlights;
+
+                ClearChanges();
+                }
+                finally {
+                        foreach (Area a in areas)
+                                a.ClearRenderContext();
+                }
+        }
 	
 	public delegate void PreRenderHandler(AreaGroup ag);
 

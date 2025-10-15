@@ -124,7 +124,7 @@ public class DataViewDisplay : Gtk.Box {
 		// initialize drawing area
 		drawingArea = new Gtk.DrawingArea();
 		drawingArea.Realized += OnRealized;
-		drawingArea.ExposeEvent += OnExposed;
+                drawingArea.Drawn += OnDrawn;
 		drawingArea.ConfigureEvent += OnConfigured;
 		drawingArea.ModifyBg(StateType.Normal, new Gdk.Color(0xff, 0xff, 0xff));
 
@@ -238,21 +238,16 @@ public class DataViewDisplay : Gtk.Box {
 		int sum = 0;
 
 		Gdk.Window win = drawingArea.GdkWindow;
-		Gdk.Rectangle alloc = drawingArea.Allocation;
-		Gdk.Rectangle rect1 = new Gdk.Rectangle(0, 0, alloc.Width, alloc.Height);
+                for (int i = 0; i < 100; i++) {
+                        t1 = System.DateTime.Now;
 
-		for (int i = 0; i < 100; i++) {
-			t1 = System.DateTime.Now;
+                        using (Cairo.Context cr = Gdk.CairoHelper.Create(win)) {
+                                layout.AreaGroup.Render(cr, true);
+                        }
 
-			win.BeginPaintRect(rect1);
+                        t2 = System.DateTime.Now;
 
-			layout.AreaGroup.Render(true);
-
-			win.EndPaint();
-
-			t2 = System.DateTime.Now;
-
-			sum += (t2 - t1).Milliseconds;
+                        sum += (t2 - t1).Milliseconds;
 		}
 
 
@@ -345,11 +340,12 @@ public class DataViewDisplay : Gtk.Box {
 		MakeOffsetVisible(dataView.Offset, ShowType.Start);
 	}
 
-	///<summary>Handle the Expose Event</summary>
-	void OnExposed (object o, ExposeEventArgs args)
-	{
-		layout.AreaGroup.Render(true);
-	}
+        ///<summary>Handle the Drawn Event</summary>
+        bool OnDrawn (object o, DrawnArgs args)
+        {
+                layout.AreaGroup.Render(args.Cr, true);
+                return true;
+        }
 
 	///<summary>Handle the Realized Event</summary>
 	void OnRealized (object o, EventArgs args)

@@ -44,7 +44,7 @@ public class SeparatorAreaPlugin : AreaPlugin
 ///<summary>An area that contains a vertical separator line</summary>
 public class SeparatorArea : Area
 {
-	Gdk.GC lineGC;
+        Gdk.Color lineColor;
 
 	public SeparatorArea(AreaGroup ag)
 			: base(ag)
@@ -58,9 +58,7 @@ public class SeparatorArea : Area
 		
 		drawer = new DummyDrawer(da, drawerInformation);
 
-		lineGC = new Gdk.GC(da.GdkWindow);
-
-		lineGC.RgbFgColor = drawer.Info.fgNormal[(int)Drawer.RowType.Even, (int)Drawer.ColumnType.Even].GdkColor;
+                lineColor = drawer.Info.fgNormal[(int)Drawer.RowType.Even, (int)Drawer.ColumnType.Even].GdkColor;
 		
 		base.Realize();
 	}
@@ -103,9 +101,9 @@ public class SeparatorArea : Area
 		if (rfull == 0) 
 			return; 
 
-		// draw seperator 
-		backPixmap.DrawLine(lineGC, x + drawer.Width / 2, 0, x + drawer.Width / 2, drawer.Height*rfull);
-	}
+                // draw separator
+                DrawLine(lineColor, x + drawer.Width / 2, 0, x + drawer.Width / 2, drawer.Height*rfull);
+        }
 
 	public override int CalcWidth(int n, bool force)
 	{

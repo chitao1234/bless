@@ -20,7 +20,7 @@
  */
 
 using System.Collections.Generic;
-using Gdk;
+using Cairo;
 
 namespace Bless.Gui.Drawers {
 
@@ -40,44 +40,44 @@ class PixmapManager
 		}
 	}
 
-	Dictionary<string, Gdk.Pixmap> pixmaps;
-	Dictionary<string, int> references;
+        Dictionary<string, ImageSurface> pixmaps;
+        Dictionary<string, int> references;
 
-	private PixmapManager()
-	{
-		pixmaps = new Dictionary<string, Gdk.Pixmap>();
-		references = new Dictionary<string, int>();
-	}
+        private PixmapManager()
+        {
+                pixmaps = new Dictionary<string, ImageSurface>();
+                references = new Dictionary<string, int>();
+        }
 
 	///<summary>
 	/// Get the id of the pixmap with the specified properties
 	///</summary>
-	public string GetPixmapId(System.Type type, Drawer.Information info, Gdk.Color fg, Gdk.Color bg)
-	{
-		return string.Format("{0}{1}{2}{3}{4}{5}", type, info.FontName, info.FontLanguage, info.Uppercase, fg.ToString(), bg.ToString());
-	}
+        public string GetPixmapId(System.Type type, Drawer.Information info, Gdk.Color fg, Gdk.Color bg)
+        {
+                return string.Format("{0}{1}{2}{3}{4}{5}", type, info.FontName, info.FontLanguage, info.Uppercase, fg.ToString(), bg.ToString());
+        }
 
 	///<summary>
 	/// Get the pixmap with the specified id.
 	/// Returns null if the pixmap doesn't exist
 	///</summary>
-	public Gdk.Pixmap GetPixmap(string id)
-	{
-		Gdk.Pixmap pix = null;
-		if (pixmaps.ContainsKey(id))
-			pix = pixmaps[id];
+        public ImageSurface GetPixmap(string id)
+        {
+                ImageSurface pix = null;
+                if (pixmaps.ContainsKey(id))
+                        pix = pixmaps[id];
 
-		return pix;
-	}
+                return pix;
+        }
 
 	///<summary>
 	/// Add the pixmap to the collection
 	///</summary>
-	public void AddPixmap(string id, Gdk.Pixmap pix)
-	{
-		pixmaps[id] = pix;
-		references[id] = 0;
-	}
+        public void AddPixmap(string id, ImageSurface pix)
+        {
+                pixmaps[id] = pix;
+                references[id] = 0;
+        }
 
 	///<summary>
 	/// Mark that we are using the pixmap
@@ -93,13 +93,13 @@ class PixmapManager
 	///</summary>
 	public void DereferencePixmap(string id)
 	{
-		--references[id];
-		if (references[id] <= 0) {
-			pixmaps[id].Dispose();
-			pixmaps.Remove(id);
-			references.Remove(id);
-		}
-	}
+                --references[id];
+                if (references[id] <= 0) {
+                        pixmaps[id].Dispose();
+                        pixmaps.Remove(id);
+                        references.Remove(id);
+                }
+        }
 
 }
 

@@ -89,43 +89,35 @@ public class OffsetArea : Area {
 	{
 	}
 	
-	protected override void RenderRowNormal(int i, int p, int n, bool blank)
-	{
-		int rx = (bytes - 1) * 2 * drawer.Width + x;
-		int ry = i * drawer.Height + y;
-		long roffset = areaGroup.Offset + i * bpr;
-		bool odd;
-		Gdk.GC backEvenGC = drawer.GetBackgroundGC(Drawer.RowType.Even, Drawer.HighlightType.Normal);
-		Gdk.GC backOddGC = drawer.GetBackgroundGC(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
+        protected override void RenderRowNormal(int i, int p, int n, bool blank)
+        {
+                int rx = (bytes - 1) * 2 * drawer.Width + x;
+                int ry = i * drawer.Height + y;
+                long roffset = areaGroup.Offset + i * bpr;
+                bool odd = (((roffset / bpr) % 2) == 1);
+                Drawer.Color backEven = drawer.GetBackgroundColor(Drawer.RowType.Even, Drawer.HighlightType.Normal);
+                Drawer.Color backOdd = drawer.GetBackgroundColor(Drawer.RowType.Odd, Drawer.HighlightType.Normal);
 
-		// odd row?
-		odd = (((roffset / bpr) % 2) == 1);
+                if (blank) {
+                        if (odd)
+                                FillRectangle(backOdd, x, ry, width, drawer.Height);
+                        else
+                                FillRectangle(backEven, x, ry, width, drawer.Height);
+                }
 
-		if (blank == true) {
-			if (odd)
-				backPixmap.DrawRectangle(backOddGC, true, x, ry, width, drawer.Height);
-			else
-				backPixmap.DrawRectangle(backEvenGC, true, x, ry, width, drawer.Height);
-		}
+                Drawer.RowType rowType = odd ? Drawer.RowType.Odd : Drawer.RowType.Even;
 
-		Drawer.RowType rowType;
+                // if nothing to draw return
+                if (n == 0)
+                        return;
 
-		if (odd)
-			rowType = Drawer.RowType.Odd;
-		else
-			rowType = Drawer.RowType.Even;
-
-		// if nothing to draw return
-		if (n == 0)
-			return;
-
-		// draw offsets
-		for (int j = 0; j < bytes; j++) {
-			drawer.DrawNormal(backEvenGC, backPixmap, rx, ry, (byte)(roffset & 0xff), rowType, Drawer.ColumnType.Even);
-			roffset = roffset >> 8;
-			rx = rx - 2 * drawer.Width;
-		}
-	}
+                // draw offsets
+                for (int j = 0; j < bytes; j++) {
+                        drawer.DrawNormal(renderContext, rx, ry, (byte)(roffset & 0xff), rowType, Drawer.ColumnType.Even);
+                        roffset = roffset >> 8;
+                        rx = rx - 2 * drawer.Width;
+                }
+        }
 
 	protected override void RenderRowHighlight(int i, int p, int n, bool blank, Drawer.HighlightType ht)
 	{
